@@ -2,6 +2,7 @@
 
 import ActionButtons from "@/components/ActionButtons";
 import CircleDisplay from "@/components/CircleDisplay";
+import Header from "@/components/Header";
 import SavingsForm from "@/components/SavingsForm";
 import StatsPanel from "@/components/StatsPanel";
 import TopBar from "@/components/TopBar";
@@ -9,7 +10,7 @@ import { useState } from "react";
 
 export default function Home() {
   const [totalSaved, setTotalSaved] = useState(0);
-  const [interestEarned, setInterestEarned] = useState(0);
+  const [totalStaked, setTotalStaked] = useState(0);
   const [cows, setCows] = useState<
     {
       id: number;
@@ -48,7 +49,7 @@ export default function Home() {
     const newInterest = Number.parseFloat(
       ((totalSaved + depositAmount) * 0.0001).toFixed(2)
     );
-    setInterestEarned(newInterest);
+    setTotalStaked(newInterest);
 
     // Crear una nueva vaquita con posición aleatoria y velocidad MUY LENTA
     const position = getRandomPositionInCircle();
@@ -67,20 +68,16 @@ export default function Home() {
   };
 
   return (
-    <main className="flex min-h-screen flex-col items-center bg-black h-screen bg-linear-to-r from-[#CEEDFB] to-[#E8DFFC]">
-      <div className="w-full max-w-md p-4 gap-4 bg-[#FFF8E7] h-full flex flex-col justify-between">
-        {/* Header */}
-        <div className="flex justify-between items-center mb-6 ">
-          <h1 className="text-4xl font-bold">Vaquita</h1>
-          <div className="px-4 py-2 border border-black rounded-full text-sm">
-            {walletAddress}
-          </div>
+    <main className="flex flex-col items-center h-screen overflow-hidden bg-gradient-to-r from-[#CEEDFB] to-[#E8DFFC]">
+      <div className="w-full max-w-md bg-[#FFF8E7] h-full flex flex-col justify-around border-2 border-black">
+        <div>
+          <Header walletAddress={walletAddress} />
+          <TopBar />
+          <ActionButtons />
+          <StatsPanel totalSaved={totalSaved} totalStaked={totalStaked} />
         </div>
-        <TopBar />
-        <ActionButtons />
-        <StatsPanel totalSaved={totalSaved} interestEarned={interestEarned} />
         <CircleDisplay cows={cows} />
-        <SavingsForm handleDeposit={handleDeposit} />
+        <SavingsForm handleDeposit={handleDeposit} countCows={cows.length} />
       </div>
     </main>
   );

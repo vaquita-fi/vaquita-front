@@ -1,10 +1,9 @@
 "use client";
 
+import { useState } from "react";
 import Cow from "./Cow";
-
-// import { X } from "lucide-react";
-// import { Button } from "@/components/ui/button";
-// import Cow from "@/components/cow";
+import { getCowName } from "@/lib/cowNames";
+import { CgSandClock } from "react-icons/cg";
 
 interface CowData {
   id: number;
@@ -22,78 +21,127 @@ interface CowDetailsProps {
 }
 
 export default function CowDetails({ cow, onClose }: CowDetailsProps) {
-  // Calcular tiempo de vida
+  const [showWithdrawConfirm, setShowWithdrawConfirm] = useState(false);
   const createdAt = cow.createdAt || new Date();
-  const lifeTime = Math.floor((Date.now() - createdAt.getTime()) / 1000); // en segundos
-
-  // Calcular velocidad
-  const speed = Math.sqrt(cow.vx * cow.vx + cow.vy * cow.vy).toFixed(2);
-
-  // Calcular dirección (en grados)
-  const direction = (Math.atan2(cow.vy, cow.vx) * (180 / Math.PI)).toFixed(0);
-
-  // Calcular posición relativa
-  const position = `(${cow.x.toFixed(0)}, ${cow.y.toFixed(0)})`;
-
-  // Calcular progreso del contador
+  const lifeTime = Math.floor((Date.now() - createdAt.getTime()) / 1000);
   const progress = (cow.counter / 1000) * 100;
 
+  // Calcular si han pasado 6 meses
+  const sixMonthsInMs = 6 * 30 * 24 * 60 * 60 * 1000; // aproximadamente 6 meses en milisegundos
+  const timeElapsed = Date.now() - createdAt.getTime();
+  const isReadyToWithdraw = timeElapsed >= sixMonthsInMs;
+
+  // Obtener nombre de la vaquita basado en su ID
+  const cowName = getCowName(cow.id);
+
+  const handleWithdrawClick = () => {
+    setShowWithdrawConfirm(true);
+  };
+
+  const handleWithdrawConfirm = () => {
+    setShowWithdrawConfirm(false);
+    onClose();
+  };
+
   return (
-    <div className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center z-10">
-      <div className="bg-[#FFF8E7] rounded-xl p-4 w-[250px] border-2 border-black">
-        <div className="flex justify-between items-center mb-3">
-          <h3 className="text-lg font-bold">
-            Vaquita #{cow.id.toString().slice(-4)}
-          </h3>
-          <button
-            onClick={onClose}
-            className="h-8 w-8 p-0 hover:bg-transparent"
-          >
-            x
-          </button>
-        </div>
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+      <div className="bg-[#FFF8E7] rounded-3xl w-[320px] border-2 border-black">
+        {!showWithdrawConfirm ? (
+          <div>
+            <div className="flex justify-between items-center px-4 py-2">
+              <div className="flex justify-center items-center gap-2 ">
+                <h3 className="text-2xl font-bold">{cowName}</h3>
+              </div>
+              <button
+                onClick={onClose}
+                className="h-8 w-8 bg-primary rounded-full flex items-center justify-center border border-black hover:bg-[#e89538]"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="bg-primary flex">
+              {" "}
+              <div className="flex w-full  py-2 px-2 border-t-[1px] border-b-4 border-black justify-center">
+                <CgSandClock size={24} /> Ends in 24 days
+              </div>
+            </div>
 
-        <div className="flex items-center gap-4 mb-4">
-          <div className="w-16 h-16">
-            <Cow size={64} hasHat={false} />
-          </div>
-          <div className="text-center bg-[#F9A03F] p-3 rounded-full border border-black">
-            <span className="text-2xl font-bold">{cow.counter}</span>
-            <div className="text-xs">Contador</div>
-          </div>
-        </div>
+            <div className="flex items-center justify-center py-4">
+              <Cow size={96} />
+              <div className="flex flex-col items-center justify-center ">
+                <div className="text-2xl font-bold">35 USDC</div>
+                <div className="text-lg">Saved</div>
+              </div>
+            </div>
+            <div className="px-4">
+              <div className="flex justify-between text-sm">
+                <span>{progress.toFixed(1)}%</span>
+              </div>
+              <div className="w-full bg-[#E6E6E6] rounded-full h-2">
+                <div
+                  className="bg-success h-2 rounded-full"
+                  style={{ width: `${progress}%` }}
+                ></div>
+              </div>
+            </div>
 
-        <div className="space-y-2 text-sm">
-          <div className="flex justify-between">
-            <span className="font-semibold">Tiempo de vida:</span>
-            <span>{lifeTime} segundos</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="font-semibold">Velocidad:</span>
-            <span>{speed} px/s</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="font-semibold">Dirección:</span>
-            <span>{direction}°</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="font-semibold">Posición:</span>
-            <span>{position}</span>
-          </div>
-        </div>
+            <p className="text-xl p-4">
+              <span>Life of time: </span>
+              <span className="font-bold">{lifeTime} seconds</span>
+            </p>
 
-        <div className="mt-3">
-          <div className="text-xs mb-1 flex justify-between">
-            <span>Progreso del contador</span>
-            <span>{progress.toFixed(1)}%</span>
+            <div className="w-full flex justify-center px-4 pb-4">
+              <button
+                onClick={handleWithdrawClick}
+                className="w-full py-3 border-2 border-b-4 border-black rounded-xl text-xl font-bold hover:bg-gray-100 transition-colors"
+              >
+                Withdraw
+              </button>
+            </div>
           </div>
-          <div className="w-full bg-gray-200 rounded-full h-2.5">
-            <div
-              className="bg-[#7AB259] h-2.5 rounded-full"
-              style={{ width: `${progress}%` }}
-            ></div>
+        ) : (
+          <div>
+            <div className="flex justify-between items-center px-4 py-2">
+              <div className="flex justify-center items-center gap-2 ">
+                <h3 className="text-2xl font-bold">{cowName}</h3>
+              </div>
+              <button
+                onClick={onClose}
+                className="h-8 w-8 bg-primary rounded-full flex items-center justify-center border border-black hover:bg-[#e89538]"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="bg-primary flex">
+              {" "}
+              <div className="flex w-full  py-2 px-2 border-t-[1px] border-b-4 border-black justify-center">
+                <CgSandClock size={24} /> Ends in 24 days
+              </div>
+            </div>
+
+            <div className="flex items-center justify-center py-4">
+              <Cow size={96} />
+              <div className="flex flex-col items-center justify-center ">
+                <div className="text-2xl font-bold">35 USDC</div>
+                <div className="text-lg">Saved</div>
+              </div>
+            </div>
+
+            <p className="text-xl p-4 text-center">
+              {isReadyToWithdraw
+                ? `${cowName} is ready to receive the funds`
+                : `Withdrawing now will affect ${cowName} :(`}
+            </p>
+            <div className="w-full flex justify-center px-4 pb-4">
+              <button
+                onClick={handleWithdrawConfirm}
+                className="w-full py-3 border-2 border-b-4 border-black rounded-xl text-xl font-bold hover:bg-gray-100 transition-colors"
+              >
+                Withdraw
+              </button>
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );

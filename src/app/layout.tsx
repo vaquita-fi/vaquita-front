@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Alexandria } from "next/font/google";
 import "./globals.css";
+import { HeroUIProvider } from "@heroui/system";
 
 const alexandria = Alexandria({
   variable: "--font-alexandria",
@@ -19,7 +20,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${alexandria.variable} antialiased`}>{children}</body>
+      <body className={`${alexandria.variable} antialiased`}>
+        <HeroUIProvider>{children}</HeroUIProvider>
+      </body>
     </html>
   );
 }

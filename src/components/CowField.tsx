@@ -3,8 +3,15 @@
 import { useRef, useEffect, useState } from "react";
 import Cow from "./Cow";
 import CowDetails from "./CowDetails";
-// import Cow from "@/components/cow"
-// import CowDetails from "@/components/cow-details"
+import {
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  Button,
+  useDisclosure,
+} from "@heroui/react";
 
 interface CowData {
   id: number;
@@ -14,9 +21,24 @@ interface CowData {
   vy: number;
   counter: number;
   createdAt?: Date;
+  amount: string;
+  amountWithdrawn: string;
+  companyId: string;
+  contractAddress: string;
+  crypto: string;
+  customerPublicKey: string;
+  depositId: string;
+  ownerUserId: string;
+  rewardWithdrawn: string;
+  state: string;
+  status: string;
+  timestamp: number;
+  transactionHash: string;
+  updatedAt: Date;
+  _id: string;
 }
 
-interface CowFieldProps {
+export interface CowFieldProps {
   cows: CowData[];
 }
 
@@ -28,6 +50,8 @@ export default function CowField({ cows: initialCows }: CowFieldProps) {
   const circleRadius = 140; // Radio del círculo
   const frameRate = 30; // Reducir la velocidad de actualización (30 fps en lugar de 60)
   const lastFrameTimeRef = useRef<number>(0);
+
+  const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
   // Actualizar localCows cuando cambia cows (props)
   useEffect(() => {
@@ -152,12 +176,7 @@ export default function CowField({ cows: initialCows }: CowFieldProps) {
   return (
     <div className="relative w-[300px] h-[300px]">
       {/* Orange circle */}
-      <div className="absolute w-full h-full rounded-full bg-[#F9A03F] border-2 border-black"></div>
-
-      {/* Main cow at the bottom */}
-      <div className="absolute bottom-0 left-0 transform translate-y-1/2">
-        <Cow size={80} hasHat={true} />
-      </div>
+      <div className="absolute w-full h-full rounded-full bg-[#F9A03F] border-[1px] border-black border-b-8"></div>
 
       {/* Dynamically placed cows */}
       {localCows.map((cow) => (
@@ -172,8 +191,8 @@ export default function CowField({ cows: initialCows }: CowFieldProps) {
           onClick={() => handleCowClick(cow)}
         >
           <div className="relative">
-            <Cow size={40} hasHat={false} />
-            <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-white px-2 py-1 rounded-full border border-black text-xs font-bold">
+            <Cow size={40} />
+            <div className="absolute px-2 py-1 text-xs font-bold transform -translate-x-1/2 border border-black rounded-full -top-6 left-1/2 bg-accent">
               {cow.counter}
             </div>
           </div>
@@ -184,6 +203,50 @@ export default function CowField({ cows: initialCows }: CowFieldProps) {
       {selectedCow && (
         <CowDetails cow={selectedCow} onClose={handleCloseDetails} />
       )}
+      <Modal
+        isDismissable={false}
+        isKeyboardDismissDisabled={true}
+        isOpen={isOpen}
+        onOpenChange={onOpenChange}
+      >
+        <ModalContent>
+          {(onClose) => (
+            <>
+              <ModalHeader className="flex flex-col gap-1">
+                Modal Title
+              </ModalHeader>
+              <ModalBody>
+                <p>
+                  Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                  Nullam pulvinar risus non risus hendrerit venenatis.
+                  Pellentesque sit amet hendrerit risus, sed porttitor quam.
+                </p>
+                <p>
+                  Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                  Nullam pulvinar risus non risus hendrerit venenatis.
+                  Pellentesque sit amet hendrerit risus, sed porttitor quam.
+                </p>
+                <p>
+                  Magna exercitation reprehenderit magna aute tempor cupidatat
+                  consequat elit dolor adipisicing. Mollit dolor eiusmod sunt ex
+                  incididunt cillum quis. Velit duis sit officia eiusmod Lorem
+                  aliqua enim laboris do dolor eiusmod. Et mollit incididunt
+                  nisi consectetur esse laborum eiusmod pariatur proident Lorem
+                  eiusmod et. Culpa deserunt nostrud ad veniam.
+                </p>
+              </ModalBody>
+              <ModalFooter>
+                <Button color="danger" variant="light" onPress={onClose}>
+                  Close
+                </Button>
+                <Button color="primary" onPress={onClose}>
+                  Action
+                </Button>
+              </ModalFooter>
+            </>
+          )}
+        </ModalContent>
+      </Modal>
     </div>
   );
 }

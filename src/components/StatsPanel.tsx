@@ -1,24 +1,29 @@
+import Image from "next/image";
 import React from "react";
-import { BiBarChartAlt2 } from "react-icons/bi";
-import { BsCoin } from "react-icons/bs";
 
 const StatsPanel = ({
   totalSaved,
-  interestEarned,
+  totalStaked,
 }: {
   totalSaved: number;
-  interestEarned: number;
+  totalStaked: number;
 }) => {
   return (
-    <div className="flex justify-between mb-6 gap-2">
-      <div className="flex-1 flex items-center pr-4 gap-2 bg-white">
-        <BsCoin size={32} />
-        <p className="text-2xl font-bold">{totalSaved} USDC</p>
+    <div className="flex justify-between mb-6 gap-2 border-t-[1px] border-b-[1px] border-black">
+      <div className="flex-1 items-center gap-2 border-r-[1px]  border-black py-2">
+        <p className="text-sm flex justify-center ">Total Staked</p>
+        <div className=" flex justify-center gap-2 items-center ">
+          <Image src="/icons/vault.svg" alt="Gift" width={30} height={30} />
+          <p className="text-lg font-bold">{totalStaked} USDC</p>
+        </div>
       </div>
 
-      <div className="flex-1 flex items-center pl-4 gap-2 bg-white">
-        <BiBarChartAlt2 size={32} />
-        <p className="text-2xl font-bold">+{interestEarned} USDC</p>
+      <div className="flex-1 items-center gap-2 border-black py-2">
+        <p className="text-sm flex justify-center">Total Saved</p>
+        <div className="flex justify-center gap-2 items-center ">
+          <Image src="/icons/BsCoin.svg" alt="Gift" width={30} height={30} />
+          <p className="text-lg font-bold">{totalSaved} USDC</p>
+        </div>
       </div>
     </div>
   );
