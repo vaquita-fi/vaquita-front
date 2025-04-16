@@ -1,19 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import Cow from "./Cow";
+// import Cow from "./Cow/Cow";
 import { getCowName } from "@/lib/cowNames";
 import { CgSandClock } from "react-icons/cg";
-
-interface CowData {
-  id: number;
-  x: number;
-  y: number;
-  vx: number;
-  vy: number;
-  counter: number;
-  createdAt?: Date;
-}
+import { CowData } from "@/types/Cow";
+import Cow from "./Cow";
 
 interface CowDetailsProps {
   cow: CowData;
@@ -44,12 +36,12 @@ export default function CowDetails({ cow, onClose }: CowDetailsProps) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
       <div className="bg-[#FFF8E7] rounded-3xl w-[320px] border-2 border-black">
         {!showWithdrawConfirm ? (
           <div>
-            <div className="flex justify-between items-center px-4 py-2">
-              <div className="flex justify-center items-center gap-2 ">
+            <div className="flex items-center justify-between px-4 py-2">
+              <div className="flex items-center justify-center gap-2 ">
                 <h3 className="text-2xl font-bold">{cowName}</h3>
               </div>
               <button
@@ -59,7 +51,7 @@ export default function CowDetails({ cow, onClose }: CowDetailsProps) {
                 ✕
               </button>
             </div>
-            <div className="bg-primary flex">
+            <div className="flex bg-primary">
               {" "}
               <div className="flex w-full  py-2 px-2 border-t-[1px] border-b-4 border-black justify-center">
                 <CgSandClock size={24} /> Ends in 24 days
@@ -79,21 +71,21 @@ export default function CowDetails({ cow, onClose }: CowDetailsProps) {
               </div>
               <div className="w-full bg-[#E6E6E6] rounded-full h-2">
                 <div
-                  className="bg-success h-2 rounded-full"
+                  className="h-2 rounded-full bg-success"
                   style={{ width: `${progress}%` }}
                 ></div>
               </div>
             </div>
 
-            <p className="text-xl p-4">
+            <p className="p-4 text-xl">
               <span>Life of time: </span>
               <span className="font-bold">{lifeTime} seconds</span>
             </p>
 
-            <div className="w-full flex justify-center px-4 pb-4">
+            <div className="flex justify-center w-full px-4 pb-4">
               <button
                 onClick={handleWithdrawClick}
-                className="w-full py-3 border-2 border-b-4 border-black rounded-xl text-xl font-bold hover:bg-gray-100 transition-colors"
+                className="w-full py-3 text-xl font-bold transition-colors border-2 border-b-4 border-black rounded-xl hover:bg-gray-100"
               >
                 Withdraw
               </button>
@@ -101,8 +93,8 @@ export default function CowDetails({ cow, onClose }: CowDetailsProps) {
           </div>
         ) : (
           <div>
-            <div className="flex justify-between items-center px-4 py-2">
-              <div className="flex justify-center items-center gap-2 ">
+            <div className="flex items-center justify-between px-4 py-2">
+              <div className="flex items-center justify-center gap-2 ">
                 <h3 className="text-2xl font-bold">{cowName}</h3>
               </div>
               <button
@@ -112,7 +104,7 @@ export default function CowDetails({ cow, onClose }: CowDetailsProps) {
                 ✕
               </button>
             </div>
-            <div className="bg-primary flex">
+            <div className="flex bg-primary">
               {" "}
               <div className="flex w-full  py-2 px-2 border-t-[1px] border-b-4 border-black justify-center">
                 <CgSandClock size={24} /> Ends in 24 days
@@ -127,15 +119,15 @@ export default function CowDetails({ cow, onClose }: CowDetailsProps) {
               </div>
             </div>
 
-            <p className="text-xl p-4 text-center">
+            <p className="p-4 text-xl text-center">
               {isReadyToWithdraw
                 ? `${cowName} is ready to receive the funds`
                 : `Withdrawing now will affect ${cowName} :(`}
             </p>
-            <div className="w-full flex justify-center px-4 pb-4">
+            <div className="flex justify-center w-full px-4 pb-4">
               <button
                 onClick={handleWithdrawConfirm}
-                className="w-full py-3 border-2 border-b-4 border-black rounded-xl text-xl font-bold hover:bg-gray-100 transition-colors"
+                className="w-full py-3 text-xl font-bold transition-colors border-2 border-b-4 border-black rounded-xl hover:bg-gray-100"
               >
                 Withdraw
               </button>

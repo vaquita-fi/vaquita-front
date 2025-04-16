@@ -1,11 +1,12 @@
 "use client";
 
 import ActionButtons from "@/components/ActionButtons";
-import CircleDisplay from "@/components/CircleDisplay";
+import CowField from "@/components/Cow/CowField";
 import Header from "@/components/Header";
 import SavingsForm from "@/components/SavingsForm";
 import StatsPanel from "@/components/StatsPanel";
 import TopBar from "@/components/TopBar";
+import { CowData } from "@/types/Cow";
 import { useState } from "react";
 
 export default function Home() {
@@ -24,45 +25,39 @@ export default function Home() {
   >([]);
   const [walletAddress] = useState("0X1234...abcd");
 
-  // Función para calcular una posición aleatoria dentro del círculo
-  const getRandomPositionInCircle = () => {
-    // Radio del círculo es aproximadamente 150px
-    const radius = 140;
-    // Ángulo aleatorio
-    const angle = Math.random() * 2 * Math.PI;
-    // Distancia aleatoria desde el centro (raíz cuadrada para distribución uniforme)
-    const distance = Math.sqrt(Math.random()) * radius;
+  const getRandomPosition = () => {
+    // Usar dimensiones del contenedor rectangular
+    const width = 300; // Ancho aproximado del contenedor
+    const height = 400; // Alto aproximado del contenedor
 
-    // Convertir coordenadas polares a cartesianas
-    const x = distance * Math.cos(angle);
-    const y = distance * Math.sin(angle);
+    // Generar posiciones aleatorias dentro del rectángulo
+    const x = (Math.random() - 0.5) * (width - 80); // 80 es el doble del tamaño de la vaca
+    const y = (Math.random() - 0.5) * (height - 80);
 
     return { x, y };
   };
 
   const handleDeposit = () => {
-    // Simular un depósito de 10 USDC
     const depositAmount = 10;
     setTotalSaved((prev) => prev + depositAmount);
 
-    // Calcular interés (0.01% del total)
     const newInterest = Number.parseFloat(
       ((totalSaved + depositAmount) * 0.0001).toFixed(2)
     );
     setTotalStaked(newInterest);
 
-    // Crear una nueva vaquita con posición aleatoria y velocidad MUY LENTA
-    const position = getRandomPositionInCircle();
+    // Usar la nueva función
+    const position = getRandomPosition();
     setCows((prev) => [
       ...prev,
       {
         id: Date.now(),
         x: position.x,
         y: position.y,
-        vx: (Math.random() - 0.5) * 0.3, // Velocidad mucho más lenta (reducida 6-7 veces)
-        vy: (Math.random() - 0.5) * 0.3, // Velocidad mucho más lenta
-        counter: 1, // Iniciar contador en 1
-        createdAt: new Date(), // Guardar la fecha de creación
+        vx: (Math.random() - 0.5) * 0.3,
+        vy: (Math.random() - 0.5) * 0.3,
+        counter: 1,
+        createdAt: new Date(),
       },
     ]);
   };
@@ -73,12 +68,12 @@ export default function Home() {
         <div>
           <Header walletAddress={walletAddress} />
           <TopBar />
-          <ActionButtons />
           <StatsPanel totalSaved={totalSaved} totalStaked={totalStaked} />
         </div>
-        <CircleDisplay cows={cows} />
+        <CowField cows={cows as CowData[]} />
         <SavingsForm handleDeposit={handleDeposit} countCows={cows.length} />
       </div>
+      <ActionButtons />
     </main>
   );
 }

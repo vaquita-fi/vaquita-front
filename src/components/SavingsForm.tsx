@@ -9,10 +9,10 @@ const SavingsForm = ({
   countCows: number;
 }) => {
   return (
-    <div className="flex flex-col justify-center items-center mb-4 gap-2">
-      <div className="flex gap-2 w-2/3">
+    <div className="flex flex-col items-center justify-center gap-2 mb-4">
+      <div className="flex w-2/3 gap-2">
         <div className="w-2/3 py-2 border-[1px] border-b-4 border-black rounded-md flex justify-center items-center">
-          6 months
+          3 months
         </div>
         <div className="flex w-1/3 py-2 border-[1px] border-b-4 border-black rounded-md justify-center items-center gap-1">
           <PiCow size={24} />
@@ -21,10 +21,10 @@ const SavingsForm = ({
       </div>
       <button
         onClick={handleDeposit}
-        className="py-2 w-2/3 bg-success hover:bg-[#28A745] text-black rounded-md flex flex-col items-center justify-center border-[1px] border-black border-b-4"
+        className="py-2 w-2/3 bg-success hover:bg-[#28A745] text-black rounded-md flex flex-col items-center justify-center border-[1px] border-black border-b-5"
       >
         <span className="text-2xl font-semibold">10 USDC</span>
-        <span className="text-md font-semibold">Deposit</span>
+        <span className="font-semibold text-md">Deposit</span>
       </button>
     </div>
   );

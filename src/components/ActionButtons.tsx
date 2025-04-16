@@ -9,7 +9,7 @@ const ActionButtons = () => {
         target="_blank"
         rel="noopener noreferrer"
       >
-        <button className="border rounded-md border-black border-b-4 p-1 w-8 h-8 flex items-center justify-center hover:bg-primary transition">
+        <button className="flex items-center justify-center w-8 h-8 p-1 transition border border-b-4 border-black rounded-md hover:bg-primary">
           <Image
             src="/icons/AiTwotoneGift.svg"
             alt="Gift"
@@ -23,7 +23,7 @@ const ActionButtons = () => {
         target="_blank"
         rel="noopener noreferrer"
       >
-        <button className="border rounded-md border-black border-b-4 p-1 w-8 h-8 flex items-center justify-center hover:bg-primary transition">
+        <button className="flex items-center justify-center w-8 h-8 p-1 transition border border-b-4 border-black rounded-md hover:bg-primary">
           <Image
             src="/icons/BsTwitterX.svg"
             alt="Twitter"
@@ -38,7 +38,7 @@ const ActionButtons = () => {
         target="_blank"
         rel="noopener noreferrer"
       >
-        <button className="border rounded-md border-black border-b-4 p-1 w-8 h-8 flex items-center justify-center hover:bg-primary transition">
+        <button className="flex items-center justify-center w-8 h-8 p-1 transition border border-b-4 border-black rounded-md hover:bg-primary">
           <Image
             src="/icons/BiLogoTelegram.svg"
             alt="Telegram"
