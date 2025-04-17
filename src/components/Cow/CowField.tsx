@@ -27,18 +27,18 @@ export default function CowField({ cows: initialCows }: CowFieldProps) {
   }, [initialCows]);
 
   return (
-    <div className="relative w-full h-full min-h-[400px]" ref={containerRef}>
-      <div className="absolute w-full h-full bg-[#F9A03F] border-[1px] border-black border-b-8" />
-
-      {localCows.map((cow) => (
-        <MovingCow
-          key={cow.id}
-          cow={cow}
-          containerWidth={containerRef.current?.offsetWidth || 0}
-          containerHeight={containerRef.current?.offsetHeight || 0}
-          onClick={() => setSelectedCow(cow)}
-        />
-      ))}
+    <div className="relative w-full h-full min-h-[400px]">
+      <div className="absolute w-full h-full bg-primary" ref={containerRef}>
+        {localCows.map((cow) => (
+          <MovingCow
+            key={cow.id}
+            cow={cow}
+            containerWidth={containerRef.current?.offsetWidth || 0}
+            containerHeight={containerRef.current?.offsetHeight || 0}
+            onClick={() => setSelectedCow(cow)}
+          />
+        ))}
+      </div>
 
       {selectedCow && (
         <CowDetails cow={selectedCow} onClose={() => setSelectedCow(null)} />

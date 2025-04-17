@@ -22,3 +22,12 @@ export interface CowData {
   updatedAt: Date;
   _id: string;
 }
+export interface Position {
+  x: number;
+  y: number;
+}
+
+export interface Velocity {
+  vx: number;
+  vy: number;
+}

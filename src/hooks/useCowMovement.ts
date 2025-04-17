@@ -1,5 +1,5 @@
 import { useRef, useEffect } from 'react';
-import { CowData } from '../types/Cow';
+import { CowData, Position, Velocity } from '../types/Cow';
 
 // Constantes
 const FRAME_RATE = 30;
@@ -12,22 +12,7 @@ const RANDOM_MOVEMENT_FORCE = 0.1;
 const COUNTER_UPDATE_INTERVAL = 2000;
 
 // Tipos
-interface Position {
-  x: number;
-  y: number;
-}
 
-interface Velocity {
-  vx: number;
-  vy: number;
-}
-
-// Funciones auxiliares
-const calculateDistance = (pos1: Position, pos2: Position): number => {
-  const dx = pos1.x - pos2.x;
-  const dy = pos1.y - pos2.y;
-  return Math.sqrt(dx * dx + dy * dy);
-};
 
 const limitSpeed = (velocity: Velocity): Velocity => {
   const speed = Math.sqrt(velocity.vx * velocity.vx + velocity.vy * velocity.vy);
@@ -123,6 +108,11 @@ export const useCowMovement = (
 
       setLocalCows((prevCows) =>
         prevCows.map((cow) => {
+          // Si la vaca tiene velocidad 0, no la movemos
+          if (cow.vx === 0 && cow.vy === 0) {
+            return cow;
+          }
+
           const containerWidth = containerRef.current?.offsetWidth || 300;
           const containerHeight = containerRef.current?.offsetHeight || 400;
           

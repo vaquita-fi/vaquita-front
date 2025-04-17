@@ -2,7 +2,7 @@ import React from "react";
 
 const TopBar = () => {
   return (
-    <div className="bg-primary border-t-2 border-b-4 border-black py-2 flex items-center justify-center">
+    <div className="flex items-center justify-center py-2 border-black border-t-1 bg-primary">
       PRE-ALPHA: Small amounts only
     </div>
   );
