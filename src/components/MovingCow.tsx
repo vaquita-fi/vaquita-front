@@ -15,8 +15,6 @@ export default function MovingCow({
   containerHeight,
   onClick,
 }: MovingCowProps) {
-  console.log(containerHeight);
-  console.log(containerWidth);
   return (
     <div
       className="absolute cursor-pointer"

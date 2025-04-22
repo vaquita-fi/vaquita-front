@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { PiCow } from "react-icons/pi";
 import DepositModal from "./DepositModal";
-// import { useSavings } from "@/hooks/useSavings";
 
 interface SavingsFormProps {
   countCows: number;
@@ -14,7 +13,6 @@ const SavingsForm: React.FC<SavingsFormProps> = ({
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentDepositAmount, setCurrentDepositAmount] = useState<number>(10);
-  // const { handleDeposit: originalHandleDeposit } = useSavings();
 
   const handleOpenModal = () => {
     setIsModalOpen(true);

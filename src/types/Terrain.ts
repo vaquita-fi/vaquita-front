@@ -1,0 +1,1 @@
+export type TileType = "empty" | "tree" | "rock" | "water";
