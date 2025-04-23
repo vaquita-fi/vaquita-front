@@ -14,7 +14,7 @@ const Header = () => {
           <Button
             isIconOnly
             onPress={onPress}
-            className="hover:bg-primary bg-background"
+            className="hover:bg-primary bg-background hover:border-black hover:border-1"
           >
             <HiMenu className="w-10 h-10 p-2 sm:w-14 sm:h-14 sm:p-1" />
           </Button>

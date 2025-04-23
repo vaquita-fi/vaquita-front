@@ -2,6 +2,7 @@
 
 import { Canvas } from "@react-three/fiber";
 import { VaquitaController } from "../voxel-entity/Vaquita/VaquitaController";
+import { GoalEntity } from "../voxel-entity/goal/GoalEntity";
 import { Ground } from "./Ground";
 import { useTerrain } from "@/hooks/useTerrain";
 import Tree from "./Tree";
@@ -37,8 +38,11 @@ export const Map = () => {
             variant={rock.variant}
           />
         ))}
+        <GoalEntity type="airplane" stage="complete" position={[5.5, 0, 5.5]} />
         <VaquitaController id="v-1" startPosition={[10, 0.5, 6]} />
         <VaquitaController id="v-2" startPosition={[1, 0.5, 6]} />
+        <VaquitaController id="v-4" startPosition={[1, 0.5, 6]} />
+        <VaquitaController id="v-5" startPosition={[1, 0.5, 6]} />
 
         <SceneControls />
       </Canvas>

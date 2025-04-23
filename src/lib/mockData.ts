@@ -49,3 +49,10 @@ export const mockWater = [
   { id: "water-10", position: [8, 0, 9] },
   { id: "water-11", position: [10, 0, 9] },
 ];
+
+export const mockGoal = [
+  { id: "goal-1", position: [5, 0, 5] },
+  { id: "goal-2", position: [5, 0, 6] },
+  { id: "goal-3", position: [6, 0, 5] },
+  { id: "goal-4", position: [6, 0, 6] },
+];

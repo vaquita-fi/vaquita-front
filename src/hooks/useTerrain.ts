@@ -1,4 +1,4 @@
-import { mockTrees, mockRocks, mockWater } from "@/lib/mockData";
+import { mockTrees, mockRocks, mockWater, mockGoal } from "@/lib/mockData";
 import { positionKey } from "@/utils/helpers";
 import { TileType } from "@/types/Terrain";
 
@@ -13,6 +13,9 @@ export const useTerrain = () => {
   );
   mockWater.forEach(({ position }) =>
     tileTypes.set(positionKey(position[0], position[2]), "water")
+  );
+  mockGoal.forEach(({ position }) =>
+    tileTypes.set(positionKey(position[0], position[2]), "goal")
   );
 
   return {
