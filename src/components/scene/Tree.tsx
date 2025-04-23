@@ -42,7 +42,10 @@ export default function Tree({ position, beingWorked, variant }: TreeProps) {
         setDebris((prev) => [
           ...prev,
           {
-            id: crypto.randomUUID(),
+            id:
+              typeof crypto !== "undefined" && crypto.randomUUID
+                ? crypto.randomUUID()
+                : Math.random().toString(36).substring(2, 10),
             position: [0, mainTreeHeight, 0],
             velocity: [vx, vy, vz],
           },

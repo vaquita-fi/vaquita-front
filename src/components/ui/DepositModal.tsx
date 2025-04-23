@@ -50,9 +50,9 @@ export const DepositModal: React.FC<DepositModalProps> = ({
       isOpen={isOpen}
       onOpenChange={(open: boolean) => !open && onClose()}
       placement="bottom"
-      backdrop="opaque"
+      backdrop="blur"
       classNames={{
-        wrapper: "bg-black/50",
+        wrapper: "bg-black/50 ",
         base: "bg-[#FEF9EF] rounded-lg border border-black shadow-lg px-2 py-4 max-w-sm mx-auto",
       }}
       // hideCloseButton={true}
@@ -60,11 +60,11 @@ export const DepositModal: React.FC<DepositModalProps> = ({
         <Image src="/close-circle.svg" alt="close" width={44} height={44} />
       }
     >
-      <ModalContent>
-        <ModalHeader className="flex items-center justify-center">
+      <ModalContent className="flex gap-2">
+        <ModalHeader className="flex px-4 py-0 mb-0">
           <span className="text-xl font-semibold text-center">Deposit</span>
         </ModalHeader>
-        <ModalBody className="px-4 py-2">
+        <ModalBody className="gap-2 px-4">
           <Input
             type="number"
             label="You're depositing"
@@ -82,7 +82,7 @@ export const DepositModal: React.FC<DepositModalProps> = ({
             endContent={<span className="px-2">USDC</span>}
           />
           {/* </div> */}
-          <div className="flex justify-between gap-2 mt-4">
+          <div className="flex justify-between gap-2">
             {[1, 5].map((amount) => (
               <Button
                 key={amount}
@@ -101,7 +101,7 @@ export const DepositModal: React.FC<DepositModalProps> = ({
             </Button>
           </div>
         </ModalBody>
-        <ModalFooter className="px-4 pt-2 pb-4">
+        <ModalFooter className="p-0 px-4 py-2">
           <Button
             onPress={handleDepositClick}
             className="w-full bg-success hover:bg-[#218838] text-black rounded-md py-6 text-xl font-bold border border-black shadow-md  border-b-4"

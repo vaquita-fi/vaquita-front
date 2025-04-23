@@ -39,7 +39,10 @@ export default function Rock({ position, beingWorked, variant }: RockProps) {
         setDebris((prev) => [
           ...prev,
           {
-            id: crypto.randomUUID(),
+            id:
+              typeof crypto !== "undefined" && crypto.randomUUID
+                ? crypto.randomUUID()
+                : Math.random().toString(36).substring(2, 10),
             position: [0, mainRockHeight, 0],
             velocity: [vx, vy, vz],
           },

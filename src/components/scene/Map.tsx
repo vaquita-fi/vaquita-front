@@ -14,31 +14,34 @@ export const Map = () => {
   const { trees, rocks } = useTerrain();
 
   return (
-    <Canvas camera={{ fov: 50 }} shadows>
-      <SceneLighting />
-      <SceneCamera />
-      <Ground />
-      {trees.map((tree) => (
-        <Tree
-          key={tree.id}
-          position={tree.position}
-          beingWorked={tree.beingWorked}
-          variant={tree.variant}
-        />
-      ))}
+    <div className="relative w-full h-full">
+      <div className="absolute inset-0 bg-gradient-to-b from-[#FEF5E4] to-[#F9E4BD] z-0" />
+      <Canvas camera={{ fov: 50 }} shadows>
+        <SceneLighting />
+        <SceneCamera />
+        <Ground />
+        {trees.map((tree) => (
+          <Tree
+            key={tree.id}
+            position={tree.position}
+            beingWorked={tree.beingWorked}
+            variant={tree.variant}
+          />
+        ))}
 
-      {rocks.map((rock) => (
-        <Rock
-          key={rock.id}
-          position={rock.position}
-          beingWorked={rock.beingWorked}
-          variant={rock.variant}
-        />
-      ))}
-      <VaquitaController id="v-1" startPosition={[10, 0.5, 6]} />
-      <VaquitaController id="v-2" startPosition={[1, 0.5, 6]} />
+        {rocks.map((rock) => (
+          <Rock
+            key={rock.id}
+            position={rock.position}
+            beingWorked={rock.beingWorked}
+            variant={rock.variant}
+          />
+        ))}
+        <VaquitaController id="v-1" startPosition={[10, 0.5, 6]} />
+        <VaquitaController id="v-2" startPosition={[1, 0.5, 6]} />
 
-      <SceneControls />
-    </Canvas>
+        <SceneControls />
+      </Canvas>
+    </div>
   );
 };

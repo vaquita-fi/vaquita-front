@@ -20,6 +20,10 @@ export const theme = {
       muted: '#C4BBAF',
       border: '#EADDC4',
     },
+    height: {
+      screen: '100vh',
+      'dvh': '100dvh', 
+    }
   },
 };
 export const darkMode = "class";

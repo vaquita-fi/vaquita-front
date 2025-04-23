@@ -1,23 +1,14 @@
 "use client";
 
 import { Map } from "@/components/scene/Map";
-// import ActionButtons from "@/components/ui/ActionButtons";
-// import CowField from "@/components/Cow/CowField";
-import Header from "@/components/ui/Header";
+import Header from "@/components/ui/Header/Header";
 import SavingsForm from "@/components/ui/SavingsForm";
-import StatsPanel from "@/components/ui/StatsPanel";
 import TopBar from "@/components/ui/TopBar";
 import { useSavings } from "@/hooks/useSavings";
-import { useState } from "react";
+import StatsPanel from "@/components/ui/StatsPanel";
 
 export default function Home() {
-  const {
-    totalSaved,
-    totalStaked,
-    cows,
-    handleDeposit: hookHandleDeposit,
-  } = useSavings();
-  const [walletAddress] = useState("0X1234...abcd");
+  const { totalSaved, cows, handleDeposit: hookHandleDeposit } = useSavings();
 
   const handleDepositClick = () => {
     const depositAmount = 10;
@@ -26,22 +17,23 @@ export default function Home() {
   };
 
   return (
-    <main className="flex flex-col items-center h-screen overflow-hidden bg-gradient-to-r from-[#CEEDFB] to-[#E8DFFC]">
-      <div className="flex flex-col justify-between w-full h-full max-w-md border-2 border-black bg-background">
-        <div>
-          <Header walletAddress={walletAddress} />
+    <main className="flex flex-col items-center h-dvh overflow-hidden bg-gradient-to-r from-[#CEEDFB] to-[#E8DFFC]">
+      <div className="flex flex-col justify-between w-full h-full max-w-3xl border-2 border-black bg-background">
+        <div className="relative bottom-0 left-0">
+          <Header />
           <TopBar />
           {/* <ActionButtons /> */}
-          <StatsPanel totalSaved={totalSaved} totalStaked={totalStaked} />
         </div>
-        {/* <CowField cows={cows} /> */}
-        <main className="w-full h-full">
-          <Map />
-        </main>
-        <SavingsForm
-          handleDeposit={handleDepositClick}
-          countCows={cows.length}
+        <StatsPanel
+          totalSaved={totalSaved}
+          totalCows={cows.length}
+          totalRemaining={90}
         />
+
+        <Map />
+        <div className="relative bottom-0 left-0">
+          <SavingsForm handleDeposit={handleDepositClick} />
+        </div>
       </div>
     </main>
   );

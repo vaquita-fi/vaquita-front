@@ -9,6 +9,7 @@ interface Props {
 
 export const PrivyWrapper = ({ children }: Props) => {
   return (
+    // TODO: Add PrivyProvider
     <PrivyProvider
       appId={process.env.NEXT_PUBLIC_PRIVY_APP_ID!}
       config={{
