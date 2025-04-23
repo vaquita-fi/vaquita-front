@@ -1,5 +1,5 @@
 "use client";
-import { Button, Divider } from "@heroui/react";
+import { Button, Divider, Snippet } from "@heroui/react";
 import { usePrivy, useWallets } from "@privy-io/react-auth";
 import { PiKeyReturnDuotone, PiWalletLight } from "react-icons/pi";
 
@@ -13,11 +13,11 @@ const WalletInfo = ({ onClose }: { onClose: () => void }) => {
 
   if (!authenticated) {
     return (
-      <div className="flex flex-col items-center gap-2 py-4">
+      <div className="flex flex-col items-start gap-2 py-4">
         <Button
           size="lg"
-          className="w-full py-6 text-black bg-primary"
-          onClick={() => login()}
+          className="w-full py-6 text-black border-b-4 border-black rounded-md border-l-1 border-t-1 border-r-1 bg-primary"
+          onPress={() => login()}
         >
           Login with email or passkey
         </Button>
@@ -34,14 +34,17 @@ const WalletInfo = ({ onClose }: { onClose: () => void }) => {
     <div className="w-full p-4 border border-black rounded-xl bg-background">
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-2 text-sm font-medium">
-          <PiWalletLight className="w-5 h-5" />
+          <PiWalletLight className="w-5 h-5 " />
           {isSmartWallet ? "Smart Wallet (AA)" : "External Wallet"}
         </div>
       </div>
 
-      <div className="p-2 font-mono text-xs break-all bg-white border border-gray-400 border-dashed rounded-md">
+      <Snippet
+        symbol=""
+        className="p-2 font-mono text-xs break-all bg-white border border-gray-400 border-dashed rounded-md"
+      >
         {walletAddress}
-      </div>
+      </Snippet>
 
       <Divider className="my-4" />
 

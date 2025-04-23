@@ -38,7 +38,7 @@ const MenuDrawer = ({
                 Menu
               </DrawerHeader>
 
-              <DrawerBody className="space-y-6 bg-background">
+              <DrawerBody className="justify-between space-y-6 bg-background">
                 <WalletInfo onClose={onClose} />
                 {/* <DrawerNavLinks /> */}
                 <SocialLinks />

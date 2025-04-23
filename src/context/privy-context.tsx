@@ -2,7 +2,8 @@
 "use client";
 
 import { PrivyProvider } from "@privy-io/react-auth";
-
+// Replace this with any of the networks listed at https://github.com/wevm/viem/blob/main/src/chains/index.ts
+import { base } from "viem/chains";
 interface Props {
   children: React.ReactNode;
 }
@@ -15,6 +16,7 @@ export const PrivyWrapper = ({ children }: Props) => {
       config={{
         loginMethods: ["wallet", "email", "passkey"],
         appearance: { theme: "light" },
+        defaultChain: base,
         embeddedWallets: {
           createOnLogin: "users-without-wallets",
         },
