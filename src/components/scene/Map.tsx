@@ -13,21 +13,25 @@ import { SceneControls } from "./SceneControls";
 import { useGoalProgress } from "@/hooks/useGoalProgress";
 import { GoalType } from "@/types/Goal";
 import { VaquitaData } from "@/types/Vaquita";
-import { Vaquita } from "../voxel-entity/Vaquita/Vaquita";
+import { VaquitaModal } from "../ui/VaquitaModal";
+import { useState } from "react";
 
 export const Map = ({
   totalSaved,
   goalTarget,
   goalType,
   cows,
+  onWithdraw,
 }: {
   totalSaved: number;
   goalTarget: number;
   goalType: GoalType;
   cows: VaquitaData[];
+  onWithdraw: (id: string) => void;
 }) => {
   const { trees, rocks } = useTerrain();
   const { stage, percentage } = useGoalProgress({ totalSaved, goalTarget });
+  const [selectedCow, setSelectedCow] = useState<VaquitaData | null>(null);
 
   return (
     <div className="relative w-full h-full">
@@ -63,12 +67,24 @@ export const Map = ({
           <VaquitaController
             key={cow.id}
             id={cow.id}
-            startPosition={cow.position}
+            cow={cow}
+            onSelect={() => setSelectedCow(cow)}
           />
         ))}
-        <Vaquita state={"walking"} direction={[1, 0]} position={[8, 1, 8]} />
         <SceneControls />
       </Canvas>
+      {selectedCow && selectedCow.status === "active" && (
+        <VaquitaModal
+          cow={selectedCow}
+          isOpen={!!selectedCow}
+          onClose={() => setSelectedCow(null)}
+          onWithdraw={(cow) => {
+            // Aquí llamas la   lógica de retirar
+            onWithdraw(cow.id);
+            setSelectedCow(null);
+          }}
+        />
+      )}
     </div>
   );
 };

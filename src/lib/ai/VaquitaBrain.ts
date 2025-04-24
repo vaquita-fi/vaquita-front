@@ -12,6 +12,8 @@ export class VaquitaBrain {
   }
 
   shouldChangeState(): boolean {
+    if (this.state === "withdrawing") return false; 
+
     const now = performance.now();
     const delay = this.getDelayForCurrentState();
     return now - this.lastStateChange > delay;
@@ -37,7 +39,10 @@ export class VaquitaBrain {
       case "working":
         return 50000; // 50s
       case "sleeping":
-        return 20000; // 20s
+        return 20000; // 20s  
+        // TODO: review this logic because it's not necessary to have a delay for withdrawing
+      case "withdrawing":
+        return 0;
     }
   }
 

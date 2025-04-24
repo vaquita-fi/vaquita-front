@@ -9,17 +9,23 @@ import { VaquitaControllerProps, VaquitaState } from "@/types/Vaquita";
 import { getTileTopY } from "@/utils/helpers";
 import { useTerrain } from "@/hooks/useTerrain";
 import { getNextValidTile } from "@/lib/navigation";
+import { useThree } from "@react-three/fiber";
 
 export const VaquitaController = ({
   id,
-  startPosition,
+  cow,
+  onSelect,
 }: VaquitaControllerProps) => {
+  const [scale, setScale] = useState(0.5);
   const ref = useRef<THREE.Group>(null);
+  const { gl } = useThree();
+  console.log(id);
 
   const [gridPos, setGridPos] = useState<[number, number]>([
-    Math.floor(startPosition.x),
-    Math.floor(startPosition.z),
+    Math.floor(cow.position.x),
+    Math.floor(cow.position.z),
   ]);
+
   const [state, setState] = useState<VaquitaState>("walking");
   const [direction, setDirection] = useState<[number, number]>([0, 1]);
 
@@ -33,7 +39,12 @@ export const VaquitaController = ({
   );
 
   useFrame((_, delta) => {
-    if (!ref.current) return;
+    if (!ref.current || cow.status === "inactive") return;
+
+    if (cow.state === "withdrawing") {
+      ref.current.position.copy(targetPosition.current);
+      return;
+    }
 
     if (brainRef.current.shouldChangeState()) {
       const next = brainRef.current.nextState();
@@ -63,10 +74,34 @@ export const VaquitaController = ({
       ref.current.position.copy(targetPosition.current);
     }
   });
-
   return (
-    <group ref={ref} position={[gridPos[0], getTileTopY(), gridPos[1]]}>
-      <Vaquita state={state} direction={[6, 6]} position={[6, 1, 6]} />
+    <group
+      ref={ref}
+      onClick={() => onSelect?.(cow)}
+      onPointerOver={() => {
+        if (cow.status === "active") {
+          setScale(0.55);
+          gl.domElement.style.cursor = "pointer";
+        }
+      }}
+      onPointerOut={() => {
+        if (cow.status === "active") {
+          setScale(0.55);
+          gl.domElement.style.cursor = "default";
+        }
+      }}
+    >
+      <Vaquita
+        status={cow.status}
+        state={state}
+        direction={direction}
+        position={{
+          x: 0,
+          y: cow.position.y,
+          z: 0,
+        }}
+        scale={scale}
+      />
     </group>
   );
 };

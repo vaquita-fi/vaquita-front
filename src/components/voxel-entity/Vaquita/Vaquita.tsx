@@ -3,22 +3,50 @@
 import WalkingAnimation from "./states/WalkingAnimation";
 import WorkingAnimation from "./states/WorkingAnimation";
 import SleepingAnimation from "./states/SleepingAnimation";
-import { VaquitaState } from "@/types/Vaquita";
+import WithdrawAnimation from "./states/WithdrawAnimation";
+import { VaquitaState, VaquitaStatus } from "@/types/Vaquita";
 
 interface VaquitaProps {
   state: VaquitaState;
-  position?: [number, number, number];
-  direction?: [number, number];
+  status: VaquitaStatus;
+  position: { x: number; y: number; z: number };
+  direction: [number, number];
+  scale: number;
 }
 
 export const Vaquita = ({
   state,
-  position = [0, 0, 0],
-  direction = [0, 1],
+  position,
+  direction,
+  scale,
+  status,
 }: VaquitaProps) => {
+  if (status === "inactive") {
+    return <WithdrawAnimation position={position} scale={scale} />;
+  }
   if (state === "walking")
-    return <WalkingAnimation position={position} direction={direction} />;
-  if (state === "working") return <WorkingAnimation />;
-  if (state === "sleeping") return <SleepingAnimation />;
+    return (
+      <WalkingAnimation
+        position={position}
+        direction={direction}
+        scale={scale}
+      />
+    );
+  if (state === "working")
+    return (
+      <WorkingAnimation
+        position={position}
+        direction={direction}
+        scale={scale}
+      />
+    );
+  if (state === "sleeping")
+    return (
+      <SleepingAnimation
+        position={position}
+        direction={direction}
+        scale={scale}
+      />
+    );
   return null;
 };

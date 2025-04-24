@@ -1,9 +1,10 @@
-export type VaquitaState = "walking" | "working" | "sleeping";
+export type VaquitaState = "walking" | "working" | "sleeping" | "withdrawing";
 export type VaquitaStatus = "active" | "inactive";
 
 export interface VaquitaControllerProps {
     id: string;
-    startPosition: VaquitaPosition;
+    cow: VaquitaData;
+    onSelect: (cow: VaquitaData) => void;
 }
 
 export interface VaquitaPosition {

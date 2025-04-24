@@ -6,15 +6,16 @@ import { MathUtils } from "three";
 import type * as THREE from "three";
 
 interface VaquitaModelProps {
-  direction?: [number, number];
-  position?: [number, number, number];
+  direction: [number, number];
+  position: { x: number; y: number; z: number };
   scale?: number;
 }
 
 const VaquitaModel = ({
   direction = [0, 1],
-  position = [0, 0, 0],
-  scale = 1,
+  // position = [0, 0, 0],
+  position = { x: 0, y: 0, z: 0 },
+  scale = 0.5,
 }: VaquitaModelProps) => {
   const groupRef = useRef<THREE.Group>(null);
   const leftLegRef = useRef<THREE.Group>(null);
@@ -26,6 +27,7 @@ const VaquitaModel = ({
   const targetRotation = useRef(0);
 
   const baseColor = "#fff3e1";
+  const bodyColor = "#E4D9C9";
   const spotColor = "#6f4e37";
   const helmetColor = "#FBA71A";
   const noseColor = "#e88e29";
@@ -75,12 +77,16 @@ const VaquitaModel = ({
   });
 
   return (
-    <group ref={groupRef} position={position} scale={scale}>
+    <group
+      ref={groupRef}
+      position={[position.x, position.y, position.z]}
+      scale={scale}
+    >
       {/* Head */}
       <group position={[0, 1.15, 0]}>
         {/* Head */}
         <mesh>
-          <boxGeometry args={[0.6, 0.5, 0.5]} />
+          <boxGeometry args={[0.5, 0.6, 0.5]} />
           <meshStandardMaterial color={baseColor} />
         </mesh>
         {/* Eyes */}
@@ -95,7 +101,7 @@ const VaquitaModel = ({
           </mesh>
         </group>
         {/* Nose */}
-        <group position={[0, 0, 0]}>
+        <group position={[0, -0.05, 0]}>
           <mesh position={[0, -0.1, 0.3]}>
             <boxGeometry args={[0.5, 0.22, 0.1]} />
             <meshStandardMaterial color={noseColor} />
@@ -112,35 +118,24 @@ const VaquitaModel = ({
           </mesh>
         </group>
         {/* Ears */}
-        <mesh position={[-0.35, 0.12, 0]}>
-          <boxGeometry args={[0.25, 0.15, 0.1]} />
+        <mesh position={[-0.3, 0.12, 0]}>
+          <boxGeometry args={[0.2, 0.15, 0.1]} />
           <meshStandardMaterial color={spotColor} />
         </mesh>
-        <mesh position={[0.35, 0.1, 0]}>
-          <boxGeometry args={[0.25, 0.15, 0.1]} />
+        <mesh position={[0.3, 0.1, 0]}>
+          <boxGeometry args={[0.2, 0.15, 0.1]} />
           <meshStandardMaterial color={spotColor} />
         </mesh>
 
         {/* Helmet */}
-        <group position={[0, 0.25, 0]}>
-          <mesh position={[0, 0, 0]}>
-            <boxGeometry args={[0.65, 0.1, 0.65]} />
+        <group position={[0, 0.15, 0]}>
+          <mesh position={[0, 0.1, 0.07]}>
+            <boxGeometry args={[0.55, 0.11, 0.65]} />
             <meshStandardMaterial color={helmetColor} />
           </mesh>
-          <mesh position={[0, 0, 0.35]}>
-            <boxGeometry args={[0.5, 0.1, 0.1]} />
-            <meshStandardMaterial color={helmetColor} />
-          </mesh>
-          <mesh position={[0, 0.1, 0]}>
-            <boxGeometry args={[0.5, 0.15, 0.65]} />
-            <meshStandardMaterial color={helmetColor} />
-          </mesh>
-          <mesh position={[0, 0.1, -0.05]}>
-            <boxGeometry args={[0.65, 0.15, 0.55]} />
-            <meshStandardMaterial color={helmetColor} />
-          </mesh>
-          <mesh position={[0, 0, 0]}>
-            <boxGeometry args={[0.5, 0.5, 0.4]} />
+
+          <mesh position={[0, 0.2, 0.03]}>
+            <boxGeometry args={[0.55, 0.25, 0.55]} />
             <meshStandardMaterial color={helmetColor} />
           </mesh>
         </group>
@@ -150,20 +145,32 @@ const VaquitaModel = ({
       <group position={[0, 0, 0]}>
         <mesh position={[0, 0.5, 0]}>
           <boxGeometry args={[0.7, 0.8, 0.4]} />
-          <meshStandardMaterial color={baseColor} />
+          <meshStandardMaterial color={bodyColor} />
         </mesh>
-        <mesh position={[0.25, 0.6, 0.21]}>
-          <boxGeometry args={[0.15, 0.15, 0.01]} />
+        <mesh position={[0.25, 0.5, 0.21]}>
+          <boxGeometry args={[0.15, 0.4, 0.01]} />
           <meshStandardMaterial color={spotColor} />
         </mesh>
-        <mesh position={[-0.2, 0.3, -0.21]}>
-          <boxGeometry args={[0.2, 0.2, 0.01]} />
+        <mesh position={[0.1, 0.5, 0.21]}>
+          <boxGeometry args={[0.15, 0.2, 0.01]} />
+          <meshStandardMaterial color={spotColor} />
+        </mesh>
+        <mesh position={[-0.2, 0.5, -0.21]}>
+          <boxGeometry args={[0.15, 0.4, 0.01]} />
+          <meshStandardMaterial color={spotColor} />
+        </mesh>
+        <mesh position={[-0.1, 0.5, -0.21]}>
+          <boxGeometry args={[0.15, 0.2, 0.01]} />
+          <meshStandardMaterial color={spotColor} />
+        </mesh>
+        <mesh position={[0.2, 0.5, -0.21]}>
+          <boxGeometry args={[0.15, 0.2, 0.01]} />
           <meshStandardMaterial color={spotColor} />
         </mesh>
       </group>
 
       {/* Legs */}
-      <group ref={leftLegRef} position={[-0.2, -0.3, 0]}>
+      <group ref={leftLegRef} position={[-0.15, -0.1, 0]}>
         <mesh>
           <boxGeometry args={[0.2, 0.5, 0.2]} />
           <meshStandardMaterial color={baseColor} />
@@ -173,7 +180,7 @@ const VaquitaModel = ({
           <meshStandardMaterial color={hoofColor} />
         </mesh>
       </group>
-      <group ref={rightLegRef} position={[0.2, -0.3, 0]}>
+      <group ref={rightLegRef} position={[0.15, -0.1, 0]}>
         <mesh>
           <boxGeometry args={[0.2, 0.5, 0.2]} />
           <meshStandardMaterial color={baseColor} />
@@ -185,7 +192,7 @@ const VaquitaModel = ({
       </group>
 
       {/* Arms */}
-      <group ref={leftArmRef} position={[-0.45, 0.2, 0]}>
+      <group ref={leftArmRef} position={[-0.4, 0.5, 0]}>
         <mesh>
           <boxGeometry args={[0.1, 0.5, 0.1]} />
           <meshStandardMaterial color={baseColor} />
@@ -195,7 +202,7 @@ const VaquitaModel = ({
           <meshStandardMaterial color={hoofColor} />
         </mesh>
       </group>
-      <group ref={rightArmRef} position={[0.45, 0.2, 0]}>
+      <group ref={rightArmRef} position={[0.4, 0.5, 0]}>
         <mesh>
           <boxGeometry args={[0.1, 0.5, 0.1]} />
           <meshStandardMaterial color={baseColor} />
@@ -207,14 +214,20 @@ const VaquitaModel = ({
       </group>
 
       {/* Tail */}
-      <mesh position={[0, 0.2, -0.35]}>
-        <boxGeometry args={[0.1, 0.1, 0.3]} />
-        <meshStandardMaterial color={spotColor} />
-      </mesh>
-      <mesh position={[0, 0.2, -0.5]}>
-        <boxGeometry args={[0.12, 0.12, 0.12]} />
-        <meshStandardMaterial color={helmetColor} />
-      </mesh>
+      <group position={[0, 0.1, -0.15]}>
+        <mesh position={[0, 0, -0.1]} rotation={[-0.5, 0, 0]}>
+          <boxGeometry args={[0.05, 0.05, 0.1]} />
+          <meshStandardMaterial color={spotColor} />
+        </mesh>
+        <mesh position={[0, -0.05, -0.15]} rotation={[-1, 0, 0]}>
+          <boxGeometry args={[0.05, 0.05, 0.1]} />
+          <meshStandardMaterial color={spotColor} />
+        </mesh>
+        <mesh position={[0, -0.1, -0.2]}>
+          <boxGeometry args={[0.07, 0.07, 0.07]} />
+          <meshStandardMaterial color={helmetColor} />
+        </mesh>
+      </group>
     </group>
   );
 };
