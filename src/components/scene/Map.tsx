@@ -13,6 +13,7 @@ import { SceneControls } from "./SceneControls";
 import { useGoalProgress } from "@/hooks/useGoalProgress";
 import { GoalType } from "@/types/Goal";
 import { VaquitaData } from "@/types/Vaquita";
+import { Vaquita } from "../voxel-entity/Vaquita/Vaquita";
 
 export const Map = ({
   totalSaved,
@@ -65,6 +66,7 @@ export const Map = ({
             startPosition={cow.position}
           />
         ))}
+        <Vaquita state={"walking"} direction={[1, 0]} position={[8, 1, 8]} />
         <SceneControls />
       </Canvas>
     </div>

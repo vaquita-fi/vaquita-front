@@ -9,50 +9,64 @@ import { VaquitaControllerProps, VaquitaState } from "@/types/Vaquita";
 import { getTileTopY } from "@/utils/helpers";
 import { useTerrain } from "@/hooks/useTerrain";
 import { getNextValidTile } from "@/lib/navigation";
+
 export const VaquitaController = ({
   id,
   startPosition,
 }: VaquitaControllerProps) => {
   const ref = useRef<THREE.Group>(null);
+
   const [gridPos, setGridPos] = useState<[number, number]>([
     Math.floor(startPosition.x),
     Math.floor(startPosition.z),
   ]);
-
   const [state, setState] = useState<VaquitaState>("walking");
+  const [direction, setDirection] = useState<[number, number]>([0, 1]);
+
   const { tileTypes } = useTerrain();
-
   const brainRef = useRef(new VaquitaBrain("walking", gridPos));
-  const lastMoveTime = useRef(performance.now());
+  const currentPosition = useRef(
+    new THREE.Vector3(gridPos[0], getTileTopY(), gridPos[1])
+  );
+  const targetPosition = useRef(
+    new THREE.Vector3(gridPos[0], getTileTopY(), gridPos[1])
+  );
 
-  useFrame(() => {
+  useFrame((_, delta) => {
     if (!ref.current) return;
 
-    // Si la IA decide cambiar de estado
     if (brainRef.current.shouldChangeState()) {
       const next = brainRef.current.nextState();
       setState(next);
     }
 
-    // Movimiento en bloques solo si está caminando
     if (brainRef.current.state === "walking") {
-      const now = performance.now();
-      if (now - lastMoveTime.current > 1000) {
-        const nextStep = getNextValidTile(gridPos, tileTypes);
+      const distance = currentPosition.current.distanceTo(
+        targetPosition.current
+      );
 
-        ref.current.position.set(nextStep[0], getTileTopY(), nextStep[1]);
+      if (distance < 0.05) {
+        const nextStep = getNextValidTile(gridPos, tileTypes);
+        targetPosition.current.set(nextStep[0], getTileTopY(), nextStep[1]);
+        const dir: [number, number] = [
+          nextStep[0] - gridPos[0],
+          nextStep[1] - gridPos[1],
+        ];
+        setDirection(dir);
         setGridPos(nextStep);
         brainRef.current.updatePosition(nextStep);
-        lastMoveTime.current = now;
       }
-    }
 
-    // Si está en working o sleeping, lo mantenemos en su posición actual
+      currentPosition.current.lerp(targetPosition.current, delta * 2);
+      ref.current.position.copy(currentPosition.current);
+    } else {
+      ref.current.position.copy(targetPosition.current);
+    }
   });
 
   return (
-    <group ref={ref} position={[gridPos[0], 0.5, gridPos[1]]}>
-      <Vaquita state={state} />
+    <group ref={ref} position={[gridPos[0], getTileTopY(), gridPos[1]]}>
+      <Vaquita state={state} direction={[6, 6]} position={[6, 1, 6]} />
     </group>
   );
 };
