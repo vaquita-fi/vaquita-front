@@ -2,17 +2,19 @@
 
 import { GoalProgressStage, GoalType } from "@/types/Goal";
 import { GoalModelFactory } from "./GoalModelFactory";
+import { GoalProgressLabel } from "@/components/ui/GoalProgressBar";
 
 interface Props {
   type: GoalType;
   stage: GoalProgressStage;
-  position?: [number, number, number];
+  progressPercentage: number;
 }
 
-export const GoalEntity = ({ type, stage, position }: Props) => {
+export const GoalEntity = ({ type, stage, progressPercentage }: Props) => {
   return (
-    <group position={position}>
+    <group position={[5.5, 0, 5.5]}>
       <GoalModelFactory type={type} stage={stage} />
+      <GoalProgressLabel percentage={progressPercentage} />
     </group>
   );
 };

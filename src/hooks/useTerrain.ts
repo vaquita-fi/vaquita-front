@@ -23,5 +23,6 @@ export const useTerrain = () => {
     trees: mockTrees,
     rocks: mockRocks,
     water: mockWater,
+    goal: mockGoal,
   };
 };

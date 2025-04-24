@@ -14,15 +14,12 @@ export const VaquitaController = ({
   startPosition,
 }: VaquitaControllerProps) => {
   const ref = useRef<THREE.Group>(null);
-
   const [gridPos, setGridPos] = useState<[number, number]>([
-    Math.floor(startPosition[0]),
-    Math.floor(startPosition[2]),
+    Math.floor(startPosition.x),
+    Math.floor(startPosition.z),
   ]);
-  console.log(id);
 
   const [state, setState] = useState<VaquitaState>("walking");
-
   const { tileTypes } = useTerrain();
 
   const brainRef = useRef(new VaquitaBrain("walking", gridPos));

@@ -10,12 +10,6 @@ import StatsPanel from "@/components/ui/StatsPanel";
 export default function Home() {
   const { totalSaved, cows, handleDeposit: hookHandleDeposit } = useSavings();
 
-  const handleDepositClick = () => {
-    const depositAmount = 10;
-
-    hookHandleDeposit(depositAmount);
-  };
-
   return (
     <main className="flex flex-col items-center h-dvh overflow-hidden bg-gradient-to-r from-[#CEEDFB] to-[#E8DFFC]">
       <div className="flex flex-col justify-between w-full h-full max-w-3xl border-2 border-black bg-background">
@@ -30,9 +24,14 @@ export default function Home() {
           totalRemaining={90}
         />
 
-        <Map />
+        <Map
+          totalSaved={totalSaved}
+          goalTarget={200}
+          goalType="airplane"
+          cows={cows}
+        />
         <div className="relative bottom-0 left-0">
-          <SavingsForm handleDeposit={handleDepositClick} />
+          <SavingsForm handleDeposit={hookHandleDeposit} />
         </div>
       </div>
     </main>

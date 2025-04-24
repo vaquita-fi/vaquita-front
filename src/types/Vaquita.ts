@@ -1,12 +1,23 @@
 export type VaquitaState = "walking" | "working" | "sleeping";
+export type VaquitaStatus = "active" | "inactive";
 
 export interface VaquitaControllerProps {
     id: string;
-    startPosition: [number, number, number];
+    startPosition: VaquitaPosition;
 }
 
-export interface Vaquita {
-  id: string;
-  position: [number, number, number];
-  state: VaquitaState;
+export interface VaquitaPosition {
+  x: number;
+  y: number;
+  z: number;
 }
+
+export interface VaquitaData {
+  id: string;
+  position: VaquitaPosition;
+  state: VaquitaState;
+  amount: string;
+  createdAt: Date;
+  status: VaquitaStatus;
+}
+

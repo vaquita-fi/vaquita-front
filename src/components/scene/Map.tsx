@@ -10,9 +10,23 @@ import Rock from "./Rock";
 import { SceneLighting } from "./SceneLighting";
 import { SceneCamera } from "./SceneCamera";
 import { SceneControls } from "./SceneControls";
+import { useGoalProgress } from "@/hooks/useGoalProgress";
+import { GoalType } from "@/types/Goal";
+import { VaquitaData } from "@/types/Vaquita";
 
-export const Map = () => {
+export const Map = ({
+  totalSaved,
+  goalTarget,
+  goalType,
+  cows,
+}: {
+  totalSaved: number;
+  goalTarget: number;
+  goalType: GoalType;
+  cows: VaquitaData[];
+}) => {
   const { trees, rocks } = useTerrain();
+  const { stage, percentage } = useGoalProgress({ totalSaved, goalTarget });
 
   return (
     <div className="relative w-full h-full">
@@ -38,12 +52,19 @@ export const Map = () => {
             variant={rock.variant}
           />
         ))}
-        <GoalEntity type="airplane" stage="complete" position={[5.5, 0, 5.5]} />
-        <VaquitaController id="v-1" startPosition={[10, 0.5, 6]} />
-        <VaquitaController id="v-2" startPosition={[1, 0.5, 6]} />
-        <VaquitaController id="v-4" startPosition={[1, 0.5, 6]} />
-        <VaquitaController id="v-5" startPosition={[1, 0.5, 6]} />
 
+        <GoalEntity
+          type={goalType}
+          stage={stage}
+          progressPercentage={percentage}
+        />
+        {cows.map((cow) => (
+          <VaquitaController
+            key={cow.id}
+            id={cow.id}
+            startPosition={cow.position}
+          />
+        ))}
         <SceneControls />
       </Canvas>
     </div>
