@@ -11,18 +11,18 @@ interface Props {
 export const PrivyWrapper = ({ children }: Props) => {
   return (
     // TODO: Add PrivyProvider
-    <PrivyProvider
-      appId={process.env.NEXT_PUBLIC_PRIVY_APP_ID!}
-      config={{
-        loginMethods: ["wallet", "email", "passkey"],
-        appearance: { theme: "light" },
-        defaultChain: base,
-        embeddedWallets: {
-          createOnLogin: "users-without-wallets",
-        },
-      }}
-    >
-      {children}
-    </PrivyProvider>
+    // <PrivyProvider
+    //   appId={process.env.NEXT_PUBLIC_PRIVY_APP_ID!}
+    //   config={{
+    //     loginMethods: ["wallet", "email", "passkey"],
+    //     appearance: { theme: "light" },
+    //     defaultChain: base,
+    //     embeddedWallets: {
+    //       createOnLogin: "users-without-wallets",
+    //     },
+    //   }}
+    // >
+    <>{children}</>
+    // </PrivyProvider>
   );
 };

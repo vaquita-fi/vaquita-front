@@ -86,7 +86,7 @@ export const VaquitaController = ({
       }}
       onPointerOut={() => {
         if (cow.status === "active") {
-          setScale(0.55);
+          setScale(0.5);
           gl.domElement.style.cursor = "default";
         }
       }}
