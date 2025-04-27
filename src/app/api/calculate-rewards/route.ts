@@ -32,8 +32,6 @@ export async function POST(req: Request) {
         const rawReward = interest * (milestone / 100);
         const rewardAmount = rawReward > 0 ? Math.max(rawReward, 0.01) : 0;
         
-        console.log(rewardAmount)
-
         rewardsToGive.push({ milestone, rewardAmount });
         rewardsClaimed[milestoneKey] = true; // Marcar como reclamado
       }
