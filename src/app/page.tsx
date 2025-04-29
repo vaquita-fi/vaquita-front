@@ -1,20 +1,18 @@
 "use client";
 
-import { Map } from "@/components/scene/Map";
+// import { Map } from "@/components/scene/Map";
 import Header from "@/components/ui/Header/Header";
-import SavingsForm from "@/components/ui/SavingsForm";
+// import SavingsForm from "@/components/ui/SavingsForm";
 import TopBar from "@/components/ui/TopBar";
-import { useSavings } from "@/hooks/useSavings";
-import StatsPanel from "@/components/ui/StatsPanel";
 
 export default function Home() {
-  const {
-    totalSaved,
-    cows,
-    handleDeposit: hookHandleDeposit,
-    withdrawVaquita,
-    totalCows,
-  } = useSavings();
+  // const {
+  //   totalSaved,
+  //   cows,
+  //   handleDeposit: hookHandleDeposit,
+  //   withdrawVaquita,
+  //   totalCows,
+  // } = useSavings();
   return (
     <main className="flex flex-col items-center h-dvh overflow-hidden bg-gradient-to-r from-[#CEEDFB] to-[#E8DFFC]">
       <div className="flex flex-col justify-between w-full h-full max-w-3xl border-2 border-black bg-background">
@@ -23,7 +21,7 @@ export default function Home() {
           <TopBar />
           {/* <ActionButtons /> */}
         </div>
-        <StatsPanel
+        {/* <StatsPanel
           totalSaved={totalSaved}
           totalCows={totalCows}
           totalRemaining={90}
@@ -38,7 +36,7 @@ export default function Home() {
         />
         <div className="relative bottom-0 left-0">
           <SavingsForm handleDeposit={hookHandleDeposit} />
-        </div>
+        </div> */}
       </div>
     </main>
   );

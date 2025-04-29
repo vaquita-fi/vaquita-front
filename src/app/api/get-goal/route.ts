@@ -2,10 +2,12 @@ import { NextResponse } from "next/server";
 import clientPromise from "@/lib/mongodb";
 import { Goal } from "@/types/Goal";
 
-export async function POST(req: Request) {
-  try {
-    const { address, goalId } = await req.json();
+export async function GET(req: Request) {
+  const { searchParams } = new URL(req.url);
+  const address = searchParams.get("address");
+  const goalId = searchParams.get("goalId");
 
+  try {
     if (!address || !goalId) {
       return NextResponse.json({ success: false, error: "Missing fields" }, { status: 400 });
     }
@@ -15,26 +17,13 @@ export async function POST(req: Request) {
 
     const goal = await db.collection<Goal>("goals").findOne({ address, goalId });
 
-
     if (!goal) {
       return NextResponse.json({ success: false, error: "Goal not found" }, { status: 404 });
     }
 
-    const { depositedAmount, targetAmount } = goal;
-
-    const newProgressPercent = Math.min(
-      Math.round((depositedAmount / targetAmount) * 100),
-      100
-    );
-
-    await db.collection("goals").updateOne(
-      { address, goalId },
-      { $set: { progressPercent: newProgressPercent } }
-    );
-
-    return NextResponse.json({ success: true, progressPercent: newProgressPercent });
+    return NextResponse.json({ success: true, goal });
   } catch (error) {
-    console.error("[UPDATE_PROGRESS_ERROR]", error);
+    console.error("[GET_GOAL_ERROR]", error);
     return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
   }
 }

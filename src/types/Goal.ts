@@ -1,8 +1,6 @@
 export type GoalProgressStage = "base" | "partial" | "half" | "almost" | "complete";
 export type GoalType = "airplane" | "smartphone" | "car";
 
-// types/goal.ts
-
 export interface Deposit {
     depositId: string;
     amount: number;
@@ -13,7 +11,7 @@ export interface Deposit {
 export interface Goal {
     _id?: string;
     goalId: string;
-    address: string;
+    walletAddress: string;
     targetAmount: number;
     durationDays: number;
     name: string;
@@ -23,11 +21,18 @@ export interface Goal {
     createdAt: Date;
     deposits: Deposit[];
     interestsAccumulated: number;
+    type: GoalType;
     rewardsClaimed: {
         "25": boolean;
         "50": boolean;
         "75": boolean;
         "100": boolean;
     }
+    participants: {
+        walletAddress: string;
+        depositedAmount: number;
+    }[];
+    beneficiaryAddress?: string;
+    mode?: "individual" | "collaborative";
 }
   

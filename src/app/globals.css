@@ -30,7 +30,8 @@
 }
 
 body {
-  background: var(--background);
+  /* background: var(--background); */
+  background-color: #FEF5E4;
   /* color: var(--foreground); */
   color: #000;
   font-family: 'Alexandria', sans-serif;
