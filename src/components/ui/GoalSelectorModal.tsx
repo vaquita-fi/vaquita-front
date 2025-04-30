@@ -1,6 +1,12 @@
 "use client";
 
-import { Modal, ModalContent, ModalHeader, ModalBody } from "@heroui/react";
+import {
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+} from "@heroui/react";
 import Image from "next/image";
 import { IoIosAddCircleOutline } from "react-icons/io";
 interface Goal {
@@ -61,7 +67,7 @@ export default function GoalSelectorModal({
                     <div
                       key={goal.goalId}
                       onClick={() => onSelectGoal(goal.goalId)}
-                      className="min-w-[250px] p-4 border rounded-lg bg-white hover:bg-gray-100 cursor-pointer flex-shrink-0 text-center"
+                      className="min-w-[250px] p-4 border rounded-lg bg-white flex flex-col items-center justify-center hover:bg-gray-100 cursor-pointer flex-shrink-0 text-center"
                     >
                       <h3 className="text-lg font-semibold">{goal.name}</h3>
                       <p className="mt-2 text-sm">
@@ -70,9 +76,9 @@ export default function GoalSelectorModal({
                       <p className="text-sm">
                         Saved: {goal.depositedAmount} USDC
                       </p>
-                      <p className="text-sm">
+                      {/* <p className="text-sm">
                         Progress: {goal.progressPercent}%
-                      </p>
+                      </p> */}
                     </div>
                   ))
                 ) : (
@@ -84,6 +90,7 @@ export default function GoalSelectorModal({
                 )}
               </div>
             </ModalBody>
+            <ModalFooter></ModalFooter>
           </>
         )}
       </ModalContent>

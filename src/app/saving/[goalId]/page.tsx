@@ -6,6 +6,7 @@ import SavingDashboard from "@/components/ui/SavingDashboard";
 import GoalSelectorModal from "@/components/ui/GoalSelectorModal";
 import { useDisclosure } from "@heroui/react";
 import { useGoals } from "@/hooks/goals/useGoals";
+import LoadingScreen from "@/components/ui/LoadingScreen";
 
 export default function SavingGroupPage() {
   const { user } = usePrivy();
@@ -29,8 +30,8 @@ export default function SavingGroupPage() {
     onOpenChange();
   };
 
-  if (isLoading || isLoadingGoals) {
-    return <div>Loading...</div>;
+  if (isLoading || isLoadingGoals || !goal) {
+    return <LoadingScreen message="Loading your worlds..." />;
   }
   if (isError || !goal || isErrorGoals) {
     return <div>Error loading goal.</div>;

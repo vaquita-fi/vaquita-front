@@ -10,6 +10,7 @@ import {
 } from "@heroui/react";
 import { VaquitaData } from "@/types/Vaquita";
 import { useState } from "react";
+import Image from "next/image";
 
 interface VaquitaModalProps {
   cow: VaquitaData | null;
@@ -29,24 +30,30 @@ export const VaquitaModal = ({
   if (!cow) return null;
 
   return (
-    <Modal isOpen={isOpen} onOpenChange={onClose}>
-      <ModalContent>
+    <Modal
+      isOpen={isOpen}
+      onOpenChange={onClose}
+      closeButton={
+        <Image src="/close-circle.svg" alt="close" width={44} height={44} />
+      }
+    >
+      <ModalContent className="bg-background">
         {(close) => (
           <>
-            <ModalHeader className="flex flex-col gap-1">
+            <ModalHeader className="flex flex-col gap-1 ">
               Vaquita Details
             </ModalHeader>
-            <ModalBody>
+            <ModalBody className="py-4">
               {confirming ? (
-                <p className="text-sm text-gray-700">
+                <p className="text-sm text-center text-gray-700">
                   Are you sure you want to withdraw this cow? This action cannot
                   be undone.
                 </p>
               ) : (
                 <>
-                  <p>
+                  {/* <p>
                     <strong>ID:</strong> {cow.id}
-                  </p>
+                  </p> */}
                   <p>
                     <strong>Amount:</strong> {cow.amount} USDC
                   </p>
@@ -61,16 +68,16 @@ export const VaquitaModal = ({
               )}
             </ModalBody>
             <ModalFooter>
-              <Button variant="light" onPress={close}>
-                Close
-              </Button>
               {!confirming ? (
-                <Button color="danger" onPress={() => setConfirming(true)}>
+                <Button
+                  onPress={() => setConfirming(true)}
+                  className="text-white bg-error"
+                >
                   Withdraw
                 </Button>
               ) : (
                 <Button
-                  color="danger"
+                  className="text-white bg-error"
                   onPress={() => {
                     onWithdraw(cow);
                     setConfirming(false);

@@ -6,7 +6,7 @@ import { usePrivy } from "@privy-io/react-auth";
 import { useGoals } from "@/hooks/goals/useGoals";
 import { useDisclosure } from "@heroui/react";
 import GoalSelectorModal from "@/components/ui/GoalSelectorModal";
-import Image from "next/image";
+import LoadingScreen from "@/components/ui/LoadingScreen";
 
 export default function Page() {
   const { user, ready } = usePrivy();
@@ -30,13 +30,6 @@ export default function Page() {
     router.push("/saving/new");
     onOpenChange();
   };
-
-  const LoadingScreen = ({ message }: { message: string }) => (
-    <div className="flex flex-col items-center justify-center gap-4 text-center h-dvh">
-      <Image src="/loading.svg" alt="Loading" width={300} height={300} />
-      <p className="text-lg text-gray-600 ">{message}</p>
-    </div>
-  );
 
   if (!ready) {
     return <LoadingScreen message="Preparing your session..." />;

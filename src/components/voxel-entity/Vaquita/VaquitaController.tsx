@@ -19,7 +19,7 @@ export const VaquitaController = ({
   const [scale, setScale] = useState(0.5);
   const ref = useRef<THREE.Group>(null);
   const { gl } = useThree();
-  console.log(id);
+  // console.log(id);
 
   const [gridPos, setGridPos] = useState<[number, number]>([
     Math.floor(cow.position.x),
