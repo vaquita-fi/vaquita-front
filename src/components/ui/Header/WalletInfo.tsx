@@ -1,11 +1,13 @@
 "use client";
 import { Button, Divider, Snippet } from "@heroui/react";
 import { usePrivy, useWallets } from "@privy-io/react-auth";
+import { useRouter } from "next/navigation";
 import { PiKeyReturnDuotone, PiWalletLight } from "react-icons/pi";
 
 const WalletInfo = ({ onClose }: { onClose: () => void }) => {
   const { ready, authenticated, login, logout } = usePrivy();
   const { wallets } = useWallets();
+  const router = useRouter();
 
   if (!ready) {
     return <p className="text-sm text-gray-400">Loading...</p>;
@@ -53,9 +55,10 @@ const WalletInfo = ({ onClose }: { onClose: () => void }) => {
         className="w-full"
         variant="light"
         color="danger"
-        onPress={() => {
-          logout();
-          onClose();
+        onPress={async () => {
+          await logout(); // Espera el logout
+          onClose(); // Cierra modal o panel
+          router.push("/"); // ✅ Redirige al home
         }}
         startContent={<PiKeyReturnDuotone />}
       >

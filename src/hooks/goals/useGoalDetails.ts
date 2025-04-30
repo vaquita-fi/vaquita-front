@@ -28,6 +28,7 @@ export function useGoalDetails(goalId: string) {
   const totalCows = cows.filter((c) => c.status === "active").length;
   const targetAmount = goal?.targetAmount ?? 0;
   const goalType: GoalType = goal?.type ?? "airplane";
+  const name = goal?.name ?? "";
 
   const depositMutation = useMutation({
     mutationFn: (amount: number) =>
@@ -56,6 +57,7 @@ export function useGoalDetails(goalId: string) {
   return {
     goal,
     cows,
+    name,
     totalSaved,
     totalCows,
     targetAmount,

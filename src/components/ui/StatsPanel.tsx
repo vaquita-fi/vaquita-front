@@ -9,10 +9,12 @@ const StatsPanel = ({
   totalSaved,
   totalCows,
   totalRemaining,
+  targetAmount,
 }: {
   totalSaved: number;
   totalCows: number;
   totalRemaining: number;
+  targetAmount: number;
 }) => {
   return (
     <div className="relative bottom-0 left-0">
@@ -37,7 +39,9 @@ const StatsPanel = ({
           >
             <Button className="flex items-center justify-center w-auto gap-1 py-2 bg-transparent border-b-2 border-black rounded-md hover:bg-primary border-t-1 border-r-1 border-l-1">
               <TbMoneybag size={20} />
-              <p className="text-sm">{totalSaved} USDC</p>
+              <p className="text-sm">
+                {targetAmount} / {totalSaved} USDC
+              </p>
             </Button>
           </Tooltip>
           <Tooltip

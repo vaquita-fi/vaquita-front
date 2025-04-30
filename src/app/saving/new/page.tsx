@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { usePrivy } from "@privy-io/react-auth";
 import { useCreateGoal } from "@/hooks/goals/useCreateGoal";
-import { Input, Button } from "@heroui/react";
+import { Input, Button, Select, SelectItem } from "@heroui/react";
 
 export default function NewGoalPage() {
   const { user } = usePrivy();
@@ -40,49 +40,53 @@ export default function NewGoalPage() {
     createGoalMutation.isPending;
 
   return (
-    <div className="flex flex-col w-full max-w-md gap-6 p-4 mx-auto">
-      <h1 className="text-2xl font-bold text-center">
-        Nuevo objetivo de ahorro
-      </h1>
+    <div className="flex flex-col items-center justify-center px-4 h-dvh">
+      <div className="flex flex-col w-full max-w-md gap-6 p-6 border-none shadow-sm rounded-xl">
+        <h1 className="text-2xl font-bold text-center">New Saving Goal</h1>
 
-      <Input
-        type="text"
-        placeholder="Nombre del objetivo"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-      />
+        <Input
+          type="text"
+          label="Goal name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+        />
 
-      <Input
-        type="number"
-        placeholder="Monto objetivo (USDC)"
-        value={targetAmount.toString()}
-        onChange={(e) => setTargetAmount(Number(e.target.value))}
-      />
+        <Input
+          type="number"
+          label="Target amount (USDC)"
+          value={targetAmount.toString()}
+          onChange={(e) => setTargetAmount(Number(e.target.value))}
+        />
 
-      <select
-        className="p-2 border rounded"
-        value={durationDays}
-        onChange={(e) => setDurationDays(Number(e.target.value))}
-      >
-        <option value={30}>1 mes</option>
-        <option value={90}>3 meses</option>
-        <option value={180}>6 meses</option>
-        <option value={365}>1 año</option>
-      </select>
+        <Select
+          selectedKeys={[durationDays.toString()]}
+          onSelectionChange={(keys) => {
+            const value = Array.from(keys)[0];
+            setDurationDays(Number(value));
+          }}
+          aria-label="Select duration"
+        >
+          <SelectItem key="30">1 month</SelectItem>
+          <SelectItem key="90">3 months</SelectItem>
+          <SelectItem key="180">6 months</SelectItem>
+          <SelectItem key="365">1 year</SelectItem>
+        </Select>
 
-      <Button
-        onPress={handleSubmit}
-        isLoading={createGoalMutation.isPending}
-        isDisabled={isButtonDisabled}
-      >
-        Crear objetivo
-      </Button>
+        <Button
+          onPress={handleSubmit}
+          isLoading={createGoalMutation.isPending}
+          isDisabled={isButtonDisabled}
+          className="w-full py-6 text-xl font-bold text-black border border-b-4 border-black rounded-md shadow-md bg-primary"
+        >
+          Create Goal
+        </Button>
 
-      {createGoalMutation.isError && (
-        <p className="text-sm text-center text-red-500">
-          Ocurrió un error. Intente nuevamente.
-        </p>
-      )}
+        {createGoalMutation.isError && (
+          <p className="text-sm text-center text-red-500">
+            Something went wrong. Please try again.
+          </p>
+        )}
+      </div>
     </div>
   );
 }

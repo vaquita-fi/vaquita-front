@@ -8,11 +8,21 @@ import TopBar from "./TopBar";
 import StatsPanel from "./StatsPanel";
 import SavingsForm from "./SavingsForm";
 import { useGoalDetails } from "@/hooks/goals/useGoalDetails";
+import LoginButton from "./LoginButton";
+import { usePrivy } from "@privy-io/react-auth";
+import { useRouter } from "next/navigation";
 
-export default function SavingDashboard({ goalId }: { goalId: string }) {
+export default function SavingDashboard({
+  goalId,
+  onOpenGoalModal,
+}: {
+  goalId?: string;
+  onOpenGoalModal: () => void;
+}) {
   const {
     totalSaved,
     cows,
+    name,
     handleDeposit,
     withdrawVaquita,
     totalCows,
@@ -20,13 +30,15 @@ export default function SavingDashboard({ goalId }: { goalId: string }) {
     goalType,
     isLoading,
     isError,
-  } = useGoalDetails(goalId);
+  } = useGoalDetails(goalId || "");
+  const { ready, login, authenticated } = usePrivy();
+  const router = useRouter();
 
   if (isLoading) {
     return <div>Loading...</div>;
   }
 
-  if (isError || !goalId) {
+  if (isError) {
     return <div>Error loading goal. Please try again.</div>;
   }
 
@@ -35,7 +47,7 @@ export default function SavingDashboard({ goalId }: { goalId: string }) {
       {/* Header + Topbar */}
       <div className="relative bottom-0 left-0">
         <Header />
-        <TopBar />
+        <TopBar descriptionGoal={name} onOpenGoalModal={onOpenGoalModal} />
       </div>
 
       {/* Stats de progreso */}
@@ -43,6 +55,7 @@ export default function SavingDashboard({ goalId }: { goalId: string }) {
         totalSaved={totalSaved}
         totalCows={totalCows}
         totalRemaining={Number(targetAmount) - totalSaved}
+        targetAmount={Number(targetAmount)}
       />
 
       {/* Mapa de las vaquitas */}
@@ -56,7 +69,17 @@ export default function SavingDashboard({ goalId }: { goalId: string }) {
 
       {/* Formulario de depósito */}
       <div className="relative bottom-0 left-0">
-        <SavingsForm handleDeposit={handleDeposit} />
+        {authenticated ? (
+          <SavingsForm handleDeposit={handleDeposit} />
+        ) : (
+          <LoginButton
+            ready={ready}
+            login={() => {
+              login();
+              router.push("/saving");
+            }}
+          />
+        )}
       </div>
     </div>
   );

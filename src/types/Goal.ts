@@ -1,5 +1,5 @@
 export type GoalProgressStage = "base" | "partial" | "half" | "almost" | "complete";
-export type GoalType = "airplane" | "smartphone" | "car";
+export type GoalType = "airplane" | "smartphone" | "car" | "empty";
 
 export interface Deposit {
     depositId: string;
