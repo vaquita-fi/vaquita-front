@@ -4,7 +4,7 @@ import { v4 as uuidv4 } from "uuid";
 
 export async function POST(req: Request) {
   try {
-    const { address, targetAmount, durationDays, name } = await req.json();
+    const { address, targetAmount, durationDays, name, type } = await req.json();
 
     if (!address || !targetAmount || !durationDays || !name) {
       return NextResponse.json({ success: false, error: "Missing fields" }, { status: 400 });
@@ -22,6 +22,7 @@ export async function POST(req: Request) {
       targetAmount,
       durationDays,
       name,
+      type,
       depositedAmount: 0,
       progressPercent: 0,
       status: "active",

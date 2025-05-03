@@ -1,5 +1,6 @@
+export type GameType = "normal" | "competitive";
 export type GoalProgressStage = "base" | "partial" | "half" | "almost" | "complete";
-export type GoalType = "airplane" | "smartphone" | "car" | "empty";
+export type GoalType = "airplane" | "smartphone" | "car" | "empty" | "web-summit";
 
 export interface Deposit {
     depositId: string;

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { usePrivy } from "@privy-io/react-auth";
 import { useCreateGoal } from "@/hooks/goals/useCreateGoal";
 import { Input, Button, Select, SelectItem } from "@heroui/react";
+import { GoalType } from "@/types/Goal";
 
 export default function NewGoalPage() {
   const { user } = usePrivy();
@@ -14,6 +15,7 @@ export default function NewGoalPage() {
   const [name, setName] = useState("");
   const [targetAmount, setTargetAmount] = useState(0);
   const [durationDays, setDurationDays] = useState(90);
+  const [goalType, setGoalType] = useState<GoalType>("empty");
 
   const createGoalMutation = useCreateGoal(address || "");
 
@@ -24,6 +26,7 @@ export default function NewGoalPage() {
         name,
         targetAmount,
         durationDays,
+        type: goalType,
       });
       if (result?.goalId) {
         router.push(`/saving/${result.goalId}`);
@@ -70,6 +73,21 @@ export default function NewGoalPage() {
           <SelectItem key="90">3 months</SelectItem>
           <SelectItem key="180">6 months</SelectItem>
           <SelectItem key="365">1 year</SelectItem>
+        </Select>
+
+        <Select
+          selectedKeys={[goalType]}
+          onSelectionChange={(keys) => {
+            const value = Array.from(keys)[0] as GoalType;
+            setGoalType(value);
+          }}
+          aria-label="Select goal type"
+        >
+          <SelectItem key="airplane">Airplane</SelectItem>
+          <SelectItem key="smartphone">Smartphone</SelectItem>
+          <SelectItem key="car">Car</SelectItem>
+          <SelectItem key="web-summit">Web Summit</SelectItem>
+          <SelectItem key="empty">Other</SelectItem>
         </Select>
 
         <Button

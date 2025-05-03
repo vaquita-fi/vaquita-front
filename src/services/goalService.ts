@@ -1,13 +1,13 @@
 "use client";
 
-import { Goal } from "@/types/Goal";
+import { Goal, GoalType } from "@/types/Goal";
 import { fetcher } from "@/utils/fetcher";
 
-export const createGoal = (address: string, targetAmount: number, durationDays: number, name: string) =>
+export const createGoal = (address: string, targetAmount: number, durationDays: number, name: string, type: GoalType) =>
   fetcher<{ goalId: string }>("/api/create-goal", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ address, targetAmount, durationDays, name }),
+    body: JSON.stringify({ address, targetAmount, durationDays, name, type }),
   });
 
 export const depositToGoal = (address: string, goalId: string, amount: number) =>
