@@ -2,9 +2,8 @@ export type VaquitaState = "walking" | "working" | "sleeping" | "withdrawing";
 export type VaquitaStatus = "active" | "inactive";
 
 export interface VaquitaControllerProps {
-    id: string;
-    cow: VaquitaData;
-    onSelect: (cow: VaquitaData) => void;
+    cow: VaquitaData[]; // Ahora es un array
+    onSelect: (cows: VaquitaData[]) => void;
 }
 
 export interface VaquitaPosition {

@@ -7,27 +7,34 @@ import {
   ModalBody,
   ModalFooter,
   Button,
+  Table,
+  TableHeader,
+  TableColumn,
+  TableBody,
+  TableRow,
+  TableCell,
 } from "@heroui/react";
 import { VaquitaData } from "@/types/Vaquita";
 import { useState } from "react";
 import Image from "next/image";
 
 interface VaquitaModalProps {
-  cow: VaquitaData | null;
   isOpen: boolean;
   onClose: () => void;
   onWithdraw: (cow: VaquitaData) => void;
+  vaquitas: VaquitaData[];
 }
 
 export const VaquitaModal = ({
-  cow,
   isOpen,
   onClose,
   onWithdraw,
+  vaquitas,
 }: VaquitaModalProps) => {
-  const [confirming, setConfirming] = useState(false);
+  const [confirming, setConfirming] = useState<string | null>(null);
 
-  if (!cow) return null;
+  // Excluir los vaquitas retirados
+  const activeVaquitas = vaquitas.filter((cow) => cow.status !== "inactive");
 
   return (
     <Modal
@@ -36,60 +43,69 @@ export const VaquitaModal = ({
       closeButton={
         <Image src="/close-circle.svg" alt="close" width={44} height={44} />
       }
+      size="2xl"
     >
-      <ModalContent className="bg-background">
-        {(close) => (
-          <>
-            <ModalHeader className="flex flex-col gap-1 ">
-              Vaquita Details
-            </ModalHeader>
-            <ModalBody className="py-4">
-              {confirming ? (
-                <p className="text-sm text-center text-gray-700">
-                  Are you sure you want to withdraw this cow? This action cannot
-                  be undone.
-                </p>
-              ) : (
-                <>
-                  {/* <p>
-                    <strong>ID:</strong> {cow.id}
-                  </p> */}
-                  <p>
-                    <strong>Amount:</strong> {cow.amount} USDC
-                  </p>
-                  <p>
-                    <strong>Status:</strong> {cow.status}
-                  </p>
-                  <p>
-                    <strong>Created At:</strong>{" "}
-                    {cow.createdAt.toLocaleDateString()}
-                  </p>
-                </>
-              )}
-            </ModalBody>
-            <ModalFooter>
-              {!confirming ? (
-                <Button
-                  onPress={() => setConfirming(true)}
-                  className="text-white bg-error"
-                >
-                  Withdraw
-                </Button>
-              ) : (
-                <Button
-                  className="text-white bg-error"
-                  onPress={() => {
-                    onWithdraw(cow);
-                    setConfirming(false);
-                    close();
-                  }}
-                >
-                  Confirm Withdraw
-                </Button>
-              )}
-            </ModalFooter>
-          </>
-        )}
+      <ModalContent className="p-4 bg-background">
+        <ModalHeader className="mb-4 text-lg font-semibold">
+          Vaquitas Overview
+        </ModalHeader>
+
+        <ModalBody>
+          {activeVaquitas.length > 0 ? (
+            <Table aria-label="Vaquitas Overview" className="w-full">
+              <TableHeader>
+                <TableColumn>Amount (USDC)</TableColumn>
+                <TableColumn>Actions</TableColumn>
+              </TableHeader>
+              <TableBody>
+                {activeVaquitas.map((cow) => (
+                  <TableRow key={cow.id}>
+                    <TableCell>{cow.amount}</TableCell>
+                    <TableCell>
+                      {confirming === cow.id ? (
+                        <div className="flex gap-2">
+                          <Button
+                            className="text-white bg-error"
+                            onPress={() => {
+                              onWithdraw(cow);
+                              setConfirming(null);
+                            }}
+                          >
+                            Confirm
+                          </Button>
+                          <Button
+                            className="text-black bg-gray-300"
+                            onPress={() => setConfirming(null)}
+                          >
+                            Cancel
+                          </Button>
+                        </div>
+                      ) : (
+                        <Button
+                          className="text-white bg-error"
+                          isDisabled={cow.status !== "active"}
+                          onPress={() => {
+                            setConfirming(cow.id);
+                          }}
+                        >
+                          Withdraw
+                        </Button>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          ) : (
+            <p className="text-center text-gray-600">No vaquitas available.</p>
+          )}
+        </ModalBody>
+
+        <ModalFooter className="flex justify-end">
+          <Button className="text-white bg-primary" onPress={onClose}>
+            Close
+          </Button>
+        </ModalFooter>
       </ModalContent>
     </Modal>
   );

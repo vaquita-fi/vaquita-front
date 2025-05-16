@@ -21,23 +21,24 @@ export const Map = ({
   totalSaved,
   goalTarget,
   goalType,
-  mycows,
+  myDeposits,
   onWithdraw,
   othercows,
 }: {
   totalSaved: number;
   goalTarget: number;
   goalType: GoalType;
-  mycows: Deposit[];
+  myDeposits: Deposit[];
   onWithdraw: (id: string) => void;
   othercows?: Deposit[];
 }) => {
   const { trees, rocks } = useTerrain();
   const { stage, percentage } = useGoalProgress({ totalSaved, goalTarget });
-  const [selectedCow, setSelectedCow] = useState<VaquitaData | null>(null);
+  const [selectedCow, setSelectedCow] = useState<VaquitaData[] | null>(null);
 
-  const myVaquitas = mapDepositsToVaquitas(mycows);
-  const otherVaquitas = mapDepositsToVaquitas(othercows || []);
+  const myDepositsVaquitas = mapDepositsToVaquitas(myDeposits);
+  const otherDepositsVaquitas = mapDepositsToVaquitas(othercows || []);
+  console.log(otherDepositsVaquitas);
 
   return (
     <div className="relative w-full h-full">
@@ -70,30 +71,18 @@ export const Map = ({
           progressPercentage={percentage}
         />
 
-        {myVaquitas.map((cow) => (
+        {myDepositsVaquitas.length > 0 && (
           <VaquitaController
-            key={cow.id}
-            id={cow.id}
-            cow={cow}
-            onSelect={() => setSelectedCow(cow)}
+            cow={myDepositsVaquitas}
+            onSelect={() => setSelectedCow(myDepositsVaquitas)}
           />
-        ))}
-
-        {otherVaquitas.map((cow) => (
-          <VaquitaController
-            key={cow.id}
-            id={cow.id}
-            cow={cow}
-            onSelect={() => setSelectedCow(cow)}
-          />
-        ))}
-
+        )}
         <SceneControls />
       </Canvas>
 
-      {selectedCow && selectedCow.status === "active" && (
+      {selectedCow && (
         <VaquitaModal
-          cow={selectedCow}
+          vaquitas={myDepositsVaquitas}
           isOpen={!!selectedCow}
           onClose={() => setSelectedCow(null)}
           onWithdraw={(cow) => {

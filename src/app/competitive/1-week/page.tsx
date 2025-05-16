@@ -12,6 +12,7 @@ import {
 } from "@heroui/react";
 import { LuFlame, LuUsersRound } from "react-icons/lu";
 import { TbMoneybag } from "react-icons/tb";
+import { useWithdraw } from "@/hooks/useWithdraw";
 
 const weekOptions = [
   { key: "1-week", label: "1 week" },
@@ -22,12 +23,18 @@ const weekOptions = [
 const Page = () => {
   const { myDeposits, otherDeposits, isLoading, isError, error } =
     useDeposits();
+  const { handleWithdraw, isPending: isWithdrawing } = useWithdraw();
 
-  if (isLoading) return <p>Loading deposits...</p>;
+  if (isLoading || isWithdrawing) return <p>Loading deposits...</p>;
   if (isError) return <p>Error: {error?.message}</p>;
 
   console.log("My Deposits:", myDeposits);
   console.log("Other Deposits:", otherDeposits);
+
+  const onWithdraw = (depositId: string) => {
+    console.log(`Withdrawing deposit ID: ${depositId}`);
+    handleWithdraw(depositId);
+  };
 
   return (
     <div className="relative flex flex-col items-center justify-center w-full h-full">
@@ -55,9 +62,9 @@ const Page = () => {
         totalSaved={0}
         goalTarget={0}
         goalType={"web-summit"}
-        mycows={myDeposits}
+        myDeposits={myDeposits}
         othercows={otherDeposits}
-        onWithdraw={() => {}}
+        onWithdraw={onWithdraw}
       />
 
       {/* Bottom Controls */}
