@@ -63,7 +63,7 @@ export default function SavingDashboard({
         totalSaved={totalSaved}
         goalTarget={Number(targetAmount)}
         goalType={goalType}
-        cows={cows}
+        mycows={cows}
         onWithdraw={withdrawVaquita}
       />
 

@@ -11,35 +11,41 @@ import { SceneLighting } from "./SceneLighting";
 import { SceneCamera } from "./SceneCamera";
 import { SceneControls } from "./SceneControls";
 import { useGoalProgress } from "@/hooks/useGoalProgress";
-import { GoalType } from "@/types/Goal";
+import { GoalType, Deposit } from "@/types/Goal";
 import { VaquitaData } from "@/types/Vaquita";
 import { VaquitaModal } from "../ui/VaquitaModal";
 import { useState } from "react";
+import { mapDepositsToVaquitas } from "@/utils/mapDepositsToVaquitas";
 
 export const Map = ({
   totalSaved,
   goalTarget,
   goalType,
-  cows,
+  mycows,
   onWithdraw,
+  othercows,
 }: {
   totalSaved: number;
   goalTarget: number;
   goalType: GoalType;
-  cows: VaquitaData[];
+  mycows: Deposit[];
   onWithdraw: (id: string) => void;
+  othercows?: Deposit[];
 }) => {
   const { trees, rocks } = useTerrain();
   const { stage, percentage } = useGoalProgress({ totalSaved, goalTarget });
   const [selectedCow, setSelectedCow] = useState<VaquitaData | null>(null);
 
+  const myVaquitas = mapDepositsToVaquitas(mycows);
+  const otherVaquitas = mapDepositsToVaquitas(othercows || []);
+
   return (
     <div className="relative w-full h-full">
-      <div className="absolute inset-0 bg-gradient-to-b from-[#FEF5E4] to-[#F9E4BD] z-0" />
       <Canvas camera={{ fov: 50 }} shadows>
         <SceneLighting />
         <SceneCamera />
         <Ground />
+
         {trees.map((tree) => (
           <Tree
             key={tree.id}
@@ -63,7 +69,8 @@ export const Map = ({
           stage={stage}
           progressPercentage={percentage}
         />
-        {cows.map((cow) => (
+
+        {myVaquitas.map((cow) => (
           <VaquitaController
             key={cow.id}
             id={cow.id}
@@ -71,15 +78,25 @@ export const Map = ({
             onSelect={() => setSelectedCow(cow)}
           />
         ))}
+
+        {otherVaquitas.map((cow) => (
+          <VaquitaController
+            key={cow.id}
+            id={cow.id}
+            cow={cow}
+            onSelect={() => setSelectedCow(cow)}
+          />
+        ))}
+
         <SceneControls />
       </Canvas>
+
       {selectedCow && selectedCow.status === "active" && (
         <VaquitaModal
           cow={selectedCow}
           isOpen={!!selectedCow}
           onClose={() => setSelectedCow(null)}
           onWithdraw={(cow) => {
-            // Aquí llamas la   lógica de retirar
             onWithdraw(cow.id);
             setSelectedCow(null);
           }}

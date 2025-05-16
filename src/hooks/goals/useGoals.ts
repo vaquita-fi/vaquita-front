@@ -1,13 +1,43 @@
-"use client";
-
-import { useQuery } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
 import { Goal } from "@/types/Goal";
-import { getGoals } from "@/services/goalService";
 
-export function useGoals(address: string) {
-  return useQuery<Goal[]>({
-    queryKey: ["goals", address],
-    queryFn: () => getGoals(address),
-    enabled: !!address,
-  });
+interface UseGoalsReturn {
+  goals: Goal[];
+  isLoading: boolean;
+  error: string | null;
 }
+
+export const useGoals = (): UseGoalsReturn => {
+  const [goals, setGoals] = useState<Goal[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchGoals = async () => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const res = await fetch("/api/goals");
+      const data = await res.json();
+
+      if (!data.success) {
+        setError(data.error);
+        return;
+      }
+
+      const fetchedGoals: Goal[] = data.goals;
+      setGoals(fetchedGoals);
+    } catch (err) {
+      console.error("Error fetching goals:", err);
+      setError("Failed to fetch goals");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchGoals();
+  }, []);
+
+  return { goals, isLoading, error };
+};

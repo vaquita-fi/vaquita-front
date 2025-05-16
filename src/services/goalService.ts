@@ -26,3 +26,14 @@ export const withdrawFromGoal = (address: string, goalId: string, depositId?: st
 
 export const getGoals = (address: string) =>
   fetcher<{ goals: Goal[] }>(`/api/get-goals?address=${address}`).then(res => res.goals || []);
+
+export const fetchGoals = async () => {
+  try {
+    const res = await fetch("/api/goals");
+    const data = await res.json();
+    console.log("All Goals:", data.goals);
+  } catch (err) {
+    console.error("Error fetching goals:", err);
+  }
+};
+

@@ -6,7 +6,7 @@ export const SceneControls = () => {
     <OrbitControls
       enablePan={false}
       enableZoom={true}
-      minDistance={8}
+      minDistance={10}
       maxDistance={18}
       target={[6, 0, 6]}
       minPolarAngle={0.2 * Math.PI} // ≈ 36°

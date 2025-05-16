@@ -9,7 +9,7 @@ export default function CompetitiveLayout({
   children: React.ReactNode;
 }) {
   return (
-    <main className="flex flex-col items-center overflow-hidden h-dvh bg-gradient-to-r bg-background">
+    <main className="flex flex-col items-center overflow-hidden h-dvh bg-[#CEEDFB] ">
       <nav className="relative bottom-0 left-0 w-full">
         <Header />
       </nav>

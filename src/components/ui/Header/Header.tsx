@@ -6,7 +6,7 @@ import MenuDrawer from "./MenuDrawer";
 
 const Header = () => {
   return (
-    <header className="flex items-center justify-between p-4 border-b-2 border-black">
+    <header className="flex items-center justify-between p-4">
       <h1 className="text-2xl font-bold sm:text-3xl">Vaquita</h1>
 
       <MenuDrawer>
