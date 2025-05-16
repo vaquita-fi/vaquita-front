@@ -25,6 +25,7 @@ const fetchDeposits = async (): Promise<Deposit[]> => {
 export const useDeposits = () => {
   const { user } = usePrivy();
   const address = user?.wallet?.address?.toLowerCase();
+  //TODO: Fabio add the address to the query 
 
   const { data: deposits = [], isLoading, isError, error } = useQuery({
     queryKey: ["deposits"],

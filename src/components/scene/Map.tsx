@@ -38,7 +38,7 @@ export const Map = ({
 
   const myDepositsVaquitas = mapDepositsToVaquitas(myDeposits);
   const otherDepositsVaquitas = mapDepositsToVaquitas(othercows || []);
-  console.log(otherDepositsVaquitas);
+  console.log({ otherDepositsVaquitas });
 
   return (
     <div className="relative w-full h-full">
@@ -77,6 +77,12 @@ export const Map = ({
             onSelect={() => setSelectedCow(myDepositsVaquitas)}
           />
         )}
+        {
+          <VaquitaController
+            cow={myDepositsVaquitas}
+            onSelect={() => setSelectedCow(myDepositsVaquitas)}
+          />
+        }
         <SceneControls />
       </Canvas>
 

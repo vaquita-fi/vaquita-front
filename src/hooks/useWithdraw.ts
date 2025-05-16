@@ -7,6 +7,7 @@ interface WithdrawPayload {
 }
 
 const withdrawDeposit = async ({ depositId }: WithdrawPayload) => {
+  // TODO: Fabio withdraw method
   const response = await fetch("/api/withdraw", {
     method: "POST",
     headers: {
