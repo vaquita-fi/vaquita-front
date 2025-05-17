@@ -1,5 +1,4 @@
 "use client";
-import { Button, Divider, Snippet } from "@heroui/react";
 import {
   ConnectWallet,
   Wallet,
@@ -12,8 +11,6 @@ import {
   Name,
   Identity,
 } from '@coinbase/onchainkit/identity';
-import { useRouter } from "next/navigation";
-import { PiKeyReturnDuotone, PiWalletLight } from "react-icons/pi";
 
 const WalletInfo = ({ onClose }: { onClose: () => void }) => {
   // All wallet UI is now handled by OnchainKit's new wallet components
