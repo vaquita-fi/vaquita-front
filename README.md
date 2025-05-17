@@ -1,40 +1,81 @@
-Vaquita Protocol
+# 🐮 Vaquita: First gamify Save-to-Earn DeFi platform
 
-A Save to Earn game for the new generation
+Vaquita is a decentralized savings platform designed to build long-term savings habits through gamification and smart incentives. Built on **Base**, Vaquita turns saving into an engaging experience where commitment is rewarded and early withdrawals are penalized — ensuring better returns for disciplined savers.
 
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+---
 
-## Getting Started
+## 🌎 Problem We're Solving
 
-First, run the development server:
+> **60% of people in LATAM don't save.**  
+There’s a lack of culture, tools, and incentives to encourage long-term saving habits.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+Vaquita addresses this by making saving fun, social, and financially rewarding.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 🕹️ How Vaquita Works
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- **Dynamic Reward Pool:**  
+  Users who stay committed to their savings goals earn not only interest but also a share of penalties from those who withdraw early.
 
-## Learn More
+- **Game Theory Incentives:**  
+  Rewards are redistributed to long-term savers, encouraging consistency and reducing the temptation of early withdrawals.
 
-To learn more about Next.js, take a look at the following resources:
+- **Gamified Experience:**  
+  Users interact with visual elements (like cow avatars representing savings goals) and track their progress in a fun, engaging way.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## ✨ Key Features
 
-## Deploy on Vercel
+✅ Savings Pools with Lock-in Periods  
+✅ Dynamic Reward Redistribution  
+✅ Early Withdrawal Penalties  
+✅ Gamified Visual Progress (Cow avatars, rewards tracking)  
+✅ Wallet Authentication (Passkey & EVM wallets)  
+✅ Simple UX with Base network integration
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+---
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 🛠️ Tech Stack
+
+**Smart Contracts:**  
+- Solidity (Base chain)
+
+**Frontend:**  
+- Next.js, TailwindCSS, React, Three.js
+
+**Backend:**  
+- Node.js, Express.js, TypeScript
+
+**Infrastructure & DevOps:**  
+- MongoDB, Vercel, Docker
+
+---
+
+## 🏗️ Deliverables (v2)
+
+1. **Reward Distribution Algorithm**  
+2. **Reinvestment Features**  
+3. **Multiple Saving Pool Durations (1m, 3m, 6m, 12m)**
+4. **Volatile Saving Pools**
+5. **Normal & Collaborative mode**
+6. **Lending without collateral**
+
+---
+
+## 🐮 Why “Vaquita”?
+
+*Vaquita* is an action where lot of people join to save for a common purpose. In this case, the community join to save and reach their goals together.   
+
+---
+
+## 🔗 Useful Links
+
+- [Vaquita Website](https://vaquita.fi)
+- [Vaquita App](https://vaquita-ui.vercel.app)
+- [Vaquita socials](https://linktr.ee/vaquitaprotocol)
+
+---
+
+### Built with ❤️ for LATAM & the world.
