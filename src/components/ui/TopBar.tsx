@@ -1,5 +1,5 @@
 import { Button } from "@heroui/react";
-import { usePrivy } from "@privy-io/react-auth";
+import { useAccount } from "wagmi";
 import React from "react";
 
 const TopBar = ({
@@ -9,17 +9,17 @@ const TopBar = ({
   descriptionGoal: string;
   onOpenGoalModal: () => void;
 }) => {
-  const { authenticated } = usePrivy();
-  return (
+    const { address } = useAccount();
+    return (
     <>
       <div className="flex justify-around w-full overflow-hidden text-sm font-semibold text-black border-gray-700 bg-success whitespace-nowrap">
         <p>PRE-ALPHA: Small amounts only</p>
         <p>PRE-ALPHA: Small amounts only</p>
       </div>
-      {authenticated ? (
+      {address ? (
         <Button
           className="flex items-center justify-center w-full py-2 text-lg font-bold border-b-2 border-black rounded-none border-t-1 bg-primary"
-          onClick={onOpenGoalModal}
+          onPress={onOpenGoalModal}
         >
           {descriptionGoal || "Select or create a goal"}
         </Button>
