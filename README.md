@@ -1,6 +1,6 @@
 # 🐮 Vaquita: First gamify Save-to-Earn DeFi platform
 
-Vaquita is a decentralized savings platform designed to build long-term savings habits through gamification and smart incentives. Built on **Base**, Vaquita turns saving into an engaging experience where commitment is rewarded and early withdrawals are penalized — ensuring better returns for disciplined savers.
+Vaquita is a decentralized savings platform designed to build long-term savings habits through gamification and smart incentives. Built on **Base**, Vaquita turns saving into an engaging experience where commitment is rewarded and early withdrawals are penalized, ensuring better returns for disciplined savers.
 
 ---
 
