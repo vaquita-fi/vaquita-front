@@ -12,7 +12,7 @@ import {
   Identity,
 } from '@coinbase/onchainkit/identity';
 
-const WalletInfo = ({ onClose }: { onClose: () => void }) => {
+const WalletInfo = () => {
   // All wallet UI is now handled by OnchainKit's new wallet components
   return (
     <div className="flex flex-col items-start gap-2 py-4">

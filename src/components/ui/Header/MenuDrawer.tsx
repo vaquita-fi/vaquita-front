@@ -32,14 +32,14 @@ const MenuDrawer = ({
         }
       >
         <DrawerContent>
-          {(onClose) => (
+          {() => (
             <>
               <DrawerHeader className="text-lg font-semibold bg-background">
                 Menu
               </DrawerHeader>
 
               <DrawerBody className="justify-between space-y-6 bg-background">
-                <WalletInfo onClose={onClose} />
+                <WalletInfo/>
                 {/* <DrawerNavLinks /> */}
                 <SocialLinks />
               </DrawerBody>
