@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { usePrivy } from "@privy-io/react-auth";
+import { useAccount } from "wagmi";
 
 export interface Deposit {
   depositId: string;
@@ -23,17 +23,19 @@ const fetchDeposits = async (): Promise<Deposit[]> => {
 };
 
 export const useDeposits = () => {
-  const { user } = usePrivy();
-  const address = user?.wallet?.address?.toLowerCase();
-  //TODO: Fabio add the address to the query 
+  console.log('useDeposits');
+  const { address } = useAccount();
+  console.log('useDeposits address', address);
+  const lowerAddress = address?.toLowerCase();
+  console.log('address', lowerAddress);
 
   const { data: deposits = [], isLoading, isError, error } = useQuery({
-    queryKey: ["deposits"],
-    queryFn: fetchDeposits
+    queryKey: ["deposits", lowerAddress],
+    queryFn: () => fetchDeposits()
   });
 
-  const myDeposits = deposits.filter((deposit: Deposit) => deposit.address.toLowerCase() === address);
-  const otherDeposits = deposits.filter((deposit: Deposit) => deposit.address.toLowerCase() !== address);
+  const myDeposits = deposits.filter((deposit: Deposit) => deposit.address.toLowerCase() === lowerAddress);
+  const otherDeposits = deposits.filter((deposit: Deposit) => deposit.address.toLowerCase() !== lowerAddress);
 
   return {
     myDeposits,

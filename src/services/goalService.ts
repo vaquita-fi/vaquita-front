@@ -10,11 +10,11 @@ export const createGoal = (address: string, targetAmount: number, durationDays: 
     body: JSON.stringify({ address, targetAmount, durationDays, name, type }),
   });
 
-export const depositToGoal = (address: string, goalId: string, amount: number) =>
+export const depositToGoal = (address: string, goalId: string, amount: number, depositId: string) =>
   fetcher<{ depositId: string }>("/api/deposit", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ address, goalId, amount }),
+    body: JSON.stringify({ address, goalId, amount, depositId }),
   });
 
 export const withdrawFromGoal = (address: string, goalId: string, depositId?: string) =>

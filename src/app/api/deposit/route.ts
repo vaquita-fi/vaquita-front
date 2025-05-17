@@ -18,11 +18,11 @@ export async function GET() {
 
 export async function POST(req: Request) {
   try {
-    const { address, amount } = await req.json();
+    const { address, amount, depositId } = await req.json();
 
-    if (!address || !amount) {
+    if (!address || !amount || !depositId) {
       return NextResponse.json(
-        { success: false, error: "Address and amount are required" },
+        { success: false, error: "Address, amount, and depositId are required" },
         { status: 400 }
       );
     }
@@ -31,7 +31,7 @@ export async function POST(req: Request) {
     const db = client.db("vaquita");
 
     const newDeposit: Deposit = {
-      depositId: uuidv4(),
+      depositId,
       address,
       amount,
       timestamp: new Date(),
