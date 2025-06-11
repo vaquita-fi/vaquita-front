@@ -6,7 +6,8 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "update-abis": "node -e \"const fs=require('fs');const abi=JSON.parse(fs.readFileSync('contracts/out/VaquitaPool.sol/VaquitaPool.json')).abi;fs.writeFileSync('src/abis/VaquitaPool.json',JSON.stringify(abi,null,2));\""
   },
   "dependencies": {
     "@coinbase/onchainkit": "^0.38.13",

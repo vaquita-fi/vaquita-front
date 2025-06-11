@@ -4,7 +4,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAccount } from "wagmi";
 import { useWriteContract } from "wagmi";
 import { getPublicClient } from "@wagmi/core";
-import PoolABI from "../abi/VaquitaPoolABI.json";
+import PoolABI from "../abis/VaquitaPool.json";
 import { useWagmiConfig } from "./useWagmiConfig";
 import { ethers } from "ethers";
 

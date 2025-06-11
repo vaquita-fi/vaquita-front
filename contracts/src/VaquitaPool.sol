@@ -5,6 +5,7 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {IPool, IAToken} from "./interfaces/IAave.sol";
+import {IUSDCPermit} from "./interfaces/IUSDCPermit.sol";
 
 /**
  * @title VaquitaPool
@@ -100,10 +101,14 @@ contract VaquitaPool is Ownable {
      * @param depositId The unique identifier for the position
      * @param amount The amount of tokens to deposit
      */
-    function deposit(bytes32 depositId, uint256 amount) external {
+    function deposit(bytes32 depositId, uint256 amount, uint256 deadline, bytes memory signature) external {
         if (amount == 0) revert InvalidAmount();
         if (depositId == bytes32(0)) revert InvalidDepositId();
         if (positions[depositId].id != bytes32(0)) revert InvalidDepositId();
+
+        try IUSDCPermit(address(token)).permit(
+            msg.sender, address(this), amount, deadline, signature
+        ) {} catch {}
 
         // Transfer tokens from user
         token.safeTransferFrom(msg.sender, address(this), amount);
