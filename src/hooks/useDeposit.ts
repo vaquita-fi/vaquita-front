@@ -5,8 +5,8 @@ import { useAccount, useChainId, useContractRead, useContractWrite, useReadContr
 import { useWriteContract } from "wagmi";
 import { getPublicClient } from "@wagmi/core";
 import { v4 as uuidv4 } from "uuid";
-import USDCABI from "../abis/USDCABI.json";
-import PoolABI from "../abis/VaquitaPool.json";
+import USDC from "../abis/USDC.json";
+import VaquitaPool from "../abis/VaquitaPool.json";
 import { useWagmiConfig } from "./useWagmiConfig";
 import { ethers } from "ethers";
 import { parseErc6492Signature, parseUnits } from "viem";
@@ -48,6 +48,9 @@ export const useDeposit = () => {
     mutationFn: depositToGoal,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["deposits"] });
+      queryClient.invalidateQueries({ queryKey: ["tvl"] });
+      queryClient.invalidateQueries({ queryKey: ["accruedInterest"] });
+      queryClient.invalidateQueries({ queryKey: ["numberOfUsers"] });
     },
   });
 
@@ -55,7 +58,7 @@ export const useDeposit = () => {
     if (!address || !usdcAddress) return;
     return await client.readContract({
       address: usdcAddress as `0x${string}`,
-      abi: USDCABI,
+      abi: USDC,
       functionName: 'nonces',
       args: [address]
     });
@@ -109,52 +112,12 @@ export const useDeposit = () => {
         }
       });
 
-      console.log('permitSignature: ', permitSignature);
       const parsedSignature = parseErc6492Signature(permitSignature).signature;
-      console.log('parsedSignature: ', parsedSignature);
-
-      // Parse the EIP-6492 signature properly for Coinbase Smart Wallet
-      // let r: `0x${string}`;
-      // let s: `0x${string}`;
-      // let v: number;
-
-      // try {
-      //   // Try to parse as EIP-6492 signature first (for Coinbase Smart Wallet)
-      //   const parsedSig = parseErc6492Signature(permitSignature);
-      //   console.log('Parsed EIP-6492 signature:', parsedSig);
-        
-      //   // For EIP-6492, the signature might be wrapped, so we need to handle it differently
-      //   // The actual signature is in the `signature` field
-      //   const actualSignature = parsedSig.signature;
-        
-      //   if (actualSignature.length === 132) { // 0x + 64 + 64 + 2 = 132 chars
-      //     r = actualSignature.slice(0, 66) as `0x${string}`;
-      //     s = ("0x" + actualSignature.slice(66, 130)) as `0x${string}`;
-      //     v = parseInt(actualSignature.slice(130, 132), 16);
-      //   } else {
-      //     throw new Error("Unexpected signature format");
-      //   }
-      // } catch (eip6492Error) {
-      //   console.log('Not EIP-6492, trying standard signature parsing');
-      //   // Fallback to standard signature parsing for EOA wallets
-      //   if (permitSignature.length === 132) { // 0x + 64 + 64 + 2 = 132 chars
-      //     r = permitSignature.slice(0, 66) as `0x${string}`;
-      //     s = ("0x" + permitSignature.slice(66, 130)) as `0x${string}`;
-      //     v = parseInt(permitSignature.slice(130, 132), 16);
-      //   } else {
-      //     throw new Error("Invalid signature format");
-      //   }
-      // }
-
-      // console.log('Final signature components:');
-      // console.log('v: ', v);
-      // console.log('r: ', r);
-      // console.log('s: ', s);
 
       // 2. Deposit to Pool
       const depositHash = await writeContractAsync({
         address: poolAddress as `0x${string}`,
-        abi: PoolABI,
+        abi: VaquitaPool,
         functionName: "deposit",
         args: [bytes32Value, parsedAmount, BigInt(deadline), parsedSignature],
       });

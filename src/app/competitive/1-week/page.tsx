@@ -13,6 +13,7 @@ import {
 import { LuFlame, LuUsersRound } from "react-icons/lu";
 import { TbMoneybag } from "react-icons/tb";
 import { useWithdraw } from "@/hooks/useWithdraw";
+import { useTVL, useAccruedInterest, useNumberOfUsers } from "@/hooks/useStats";
 
 const weekOptions = [
   { key: "1-week", label: "1 week" },
@@ -24,7 +25,9 @@ const Page = () => {
   const { myDeposits, otherDeposits, isLoading, isError, error } =
     useDeposits();
   const { handleWithdraw, isPending: isWithdrawing } = useWithdraw();
-
+  const { data: tvl, isLoading: tvlLoading } = useTVL();
+  const { data: accruedInterest, isLoading: interestLoading } = useAccruedInterest();
+  const { data: numberOfUsers, isLoading: usersLoading } = useNumberOfUsers();
   if (isLoading || isWithdrawing) return <p>Loading deposits...</p>;
   if (isError) return <p>Error: {error?.message}</p>;
 
@@ -44,14 +47,14 @@ const Page = () => {
           <Card className="px-4 bg-background">
             <CardBody className="flex flex-row items-center justify-center gap-2">
               <LuFlame size={20} className="text-primary" />
-              <p className="text-lg ">200</p>
+              <p className="text-lg ">{interestLoading ? "Loading..." : accruedInterest?.toString()}</p>
             </CardBody>
           </Card>
 
           <Card className="px-4 bg-background">
             <CardBody className="flex flex-row items-center justify-center gap-2">
               <TbMoneybag size={20} className="text-success" />
-              <p className="text-lg ">{100}</p>
+              <p className="text-lg ">{tvlLoading ? "Loading..." : tvl?.toString()}</p>
             </CardBody>
           </Card>
         </div>
@@ -89,7 +92,7 @@ const Page = () => {
             <Card className="w-1/3 bg-background">
               <CardBody className="flex flex-row items-center justify-center gap-2">
                 <LuUsersRound size={20} />
-                <p className="text-sm">1030</p>
+                <p className="text-sm">{usersLoading ? "Loading..." : numberOfUsers}</p>
               </CardBody>
             </Card>
           </div>

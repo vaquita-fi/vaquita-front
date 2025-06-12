@@ -19,6 +19,7 @@ contract VaquitaPool is Ownable {
         bytes32 id;
         address owner;
         uint256 amount;
+        uint256 aTokensReceived;
         uint256 entryTime;
         uint256 finalizationTime;
         bool isActive;
@@ -42,7 +43,7 @@ contract VaquitaPool is Ownable {
     mapping(address => uint256) public userTotalDeposits;
 
     // Events
-    event FundsDeposited(bytes32 indexed depositId, address indexed owner, uint256 amount);
+    event FundsDeposited(bytes32 indexed depositId, address indexed owner, uint256 amount, uint256 aTokensReceived);
     event FundsWithdrawn(bytes32 indexed depositId, address indexed owner, uint256 amount, uint256 reward);
     event RewardDistributed(bytes32 indexed depositId, address indexed owner, uint256 reward);
     event LockPeriodUpdated(uint256 newLockPeriod);
@@ -113,11 +114,19 @@ contract VaquitaPool is Ownable {
         // Transfer tokens from user
         token.safeTransferFrom(msg.sender, address(this), amount);
 
+        uint256 balanceBefore = aToken.balanceOf(address(this));
+
+        // Supply to Aave
+        _supplyToAave(amount);
+
+        uint256 aTokensReceived = aToken.balanceOf(address(this)) - balanceBefore;
+
         // Create position
         Position storage position = positions[depositId];
         position.id = depositId;
         position.owner = msg.sender;
         position.amount = amount;
+        position.aTokensReceived = aTokensReceived;
         position.entryTime = block.timestamp;
         position.finalizationTime = block.timestamp + lockPeriod;
         position.isActive = true;
@@ -126,10 +135,7 @@ contract VaquitaPool is Ownable {
         userTotalDeposits[msg.sender] += amount;
         totalDeposits += amount;
 
-        // Supply to Aave
-        _supplyToAave(amount);
-
-        emit FundsDeposited(depositId, msg.sender, amount);
+        emit FundsDeposited(depositId, msg.sender, amount, aTokensReceived);
     }
 
     /**
@@ -145,6 +151,11 @@ contract VaquitaPool is Ownable {
         // Withdraw from Aave and get actual amount received
         uint256 withdrawnAmount = aavePool.withdraw(address(token), position.amount, address(this));
         uint256 interest = withdrawnAmount > position.amount ? withdrawnAmount - position.amount : 0;
+
+        // Update position and user info
+        position.isActive = false;
+        userTotalDeposits[msg.sender] -= position.amount;
+        totalDeposits -= position.amount;
 
         uint256 reward = 0;
         if (block.timestamp < position.finalizationTime) {
@@ -165,11 +176,6 @@ contract VaquitaPool is Ownable {
             token.safeTransfer(msg.sender, totalWithdrawal);
         }
 
-        // Update position and user info
-        position.isActive = false;
-        userTotalDeposits[msg.sender] -= position.amount;
-        totalDeposits -= position.amount;
-
         emit FundsWithdrawn(depositId, msg.sender, position.amount, reward);
     }
 
@@ -178,6 +184,7 @@ contract VaquitaPool is Ownable {
      * @param depositId The ID of the position
      * @return positionOwner The position owner
      * @return positionAmount The position amount
+     * @return aTokensReceived The amount of aTokens received
      * @return entryTime The entry time
      * @return finalizationTime The finalization time
      * @return positionIsActive Whether the position is active
@@ -185,6 +192,7 @@ contract VaquitaPool is Ownable {
     function getPosition(bytes32 depositId) external view returns (
         address positionOwner,
         uint256 positionAmount,
+        uint256 aTokensReceived,
         uint256 entryTime,
         uint256 finalizationTime,
         bool positionIsActive
@@ -193,6 +201,7 @@ contract VaquitaPool is Ownable {
         return (
             position.owner,
             position.amount,
+            position.aTokensReceived,
             position.entryTime,
             position.finalizationTime,
             position.isActive

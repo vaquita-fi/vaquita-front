@@ -140,6 +140,11 @@
         "internalType": "uint256"
       },
       {
+        "name": "aTokensReceived",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
         "name": "entryTime",
         "type": "uint256",
         "internalType": "uint256"
@@ -219,6 +224,11 @@
       },
       {
         "name": "amount",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "aTokensReceived",
         "type": "uint256",
         "internalType": "uint256"
       },
@@ -434,6 +444,12 @@
       },
       {
         "name": "amount",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      },
+      {
+        "name": "aTokensReceived",
         "type": "uint256",
         "indexed": false,
         "internalType": "uint256"
