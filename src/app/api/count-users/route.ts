@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import clientPromise from "@/lib/mongodb";
 import { Deposit } from "@/types/Goal";
 
-export async function GET(req: Request) {
+export async function GET() {
   try {
     const client = await clientPromise;
     const db = client.db("vaquita");

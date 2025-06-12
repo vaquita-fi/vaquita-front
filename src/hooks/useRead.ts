@@ -3,9 +3,7 @@ import { getPublicClient } from "@wagmi/core";
 import { useWagmiConfig } from "./useWagmiConfig";
 import AavePool from "../abis/AavePool.json";
 import VaquitaPool from "../abis/VaquitaPool.json";
-import { useQuery } from "@tanstack/react-query";
 import { Deposit } from "@/types/Goal";
-import USDC from "../abis/USDC.json";
 import { ethers } from "ethers";
 
 const useRead = () => {
@@ -47,8 +45,8 @@ const useRead = () => {
     const totalATokensReceived = await Promise.all(
       depositsData.deposits.map(async (deposit: Deposit) => {
         const bytes32Value = ethers.zeroPadValue("0x" + deposit.depositId.replace(/-/g, ""), 32);
-        const position : any = await getDeposit(bytes32Value);
-        return position ? BigInt(position[2]) : BigInt(0); // ensure BigInt
+        const position = await getDeposit(bytes32Value) as Array<string>;
+        return position ? BigInt(position.length > 3 ? position[2] : 0) : BigInt(0); // ensure BigInt
       })
     ).then(results => results.reduce((acc, curr) => acc + curr, BigInt(0)))
     .catch(error => {
@@ -57,11 +55,11 @@ const useRead = () => {
     });
     console.log('totalATokensReceived: ', totalATokensReceived);
 
-    const reservedData : any = await getReservedData();
+    const reservedData = await getReservedData() as { liquidityIndex: string };
     console.log('reservedData: ', reservedData);
 
-    // calculate the accrued interest
-    const accruedInterest = totalATokensReceived * BigInt(reservedData.liquidityIndex) / BigInt(1e27);
+        // calculate the accrued interest
+    const accruedInterest = totalATokensReceived * BigInt(reservedData?.liquidityIndex) / BigInt(1e27);
     console.log('accruedInterest: ', accruedInterest);
 
     // return the accrued interest

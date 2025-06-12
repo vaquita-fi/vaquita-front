@@ -1,7 +1,7 @@
 "use client";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useAccount, useChainId, useContractRead, useContractWrite, useReadContract, useSignTypedData } from "wagmi";
+import { useAccount, useChainId, useSignTypedData } from "wagmi";
 import { useWriteContract } from "wagmi";
 import { getPublicClient } from "@wagmi/core";
 import { v4 as uuidv4 } from "uuid";
