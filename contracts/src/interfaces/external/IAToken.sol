@@ -25,10 +25,4 @@ interface IAToken {
      * @return The total supply of the token
      */
     function totalSupply() external view returns (uint256);
-
-    /**
-     * @dev Returns the liquidity index of the token
-     * @return The liquidity index of the token
-     */
-    function liquidityIndex() external view returns (uint256);
 }
