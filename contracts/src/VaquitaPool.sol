@@ -99,7 +99,7 @@ contract VaquitaPool is Ownable {
         aavePool.supply(address(token), amount, address(this), 0);
 
         // Get current liquidity index from Aave
-        uint256 currentLiquidityIndex = aToken.liquidityIndex();
+        uint256 currentLiquidityIndex = _getLiquidityIndex();
 
         // Create position with liquidity index snapshot
         Position storage position = positions[depositId];
@@ -123,7 +123,7 @@ contract VaquitaPool is Ownable {
      * @dev Withdraw from a position
      * @param depositId The ID of the position to withdraw from
      */
-    function withdraw(bytes16 depositId) external {
+    function withdraw(bytes16 depositId) external returns (uint256) {
         Position storage position = positions[depositId];
         if (position.id == bytes16(0)) revert PositionNotFound();
         if (!position.isActive) revert PositionAlreadyWithdrawn();
@@ -161,6 +161,7 @@ contract VaquitaPool is Ownable {
         }
 
         emit FundsWithdrawn(depositId, msg.sender, position.amount, interest, reward);
+        return withdrawnAmount;
     }
 
     /**
@@ -170,7 +171,7 @@ contract VaquitaPool is Ownable {
      * @return The current value including accrued interest
      */
     function _calculateCurrentPositionValue(uint256 principalAmount, uint256 entryLiquidityIndex) internal view returns (uint256) {
-        uint256 currentLiquidityIndex = aToken.liquidityIndex();
+        uint256 currentLiquidityIndex = _getLiquidityIndex();
         
         // Calculate the current value: principal * (currentIndex / entryIndex)
         return (principalAmount * currentLiquidityIndex) / entryLiquidityIndex;
@@ -272,5 +273,11 @@ contract VaquitaPool is Ownable {
         if (newFee > BASIS_POINTS) revert InvalidFee();
         earlyWithdrawalFee = newFee;
         emit EarlyWithdrawalFeeUpdated(newFee);
+    }
+
+    function _getLiquidityIndex() internal view returns (uint256) {
+        // ReserveData struct: liquidityIndex is the second value
+        (, uint256 liquidityIndex, , , , , , , , , , ) = aavePool.getReserveData(address(token));
+        return liquidityIndex;
     }
 }
