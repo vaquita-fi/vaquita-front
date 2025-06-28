@@ -54,5 +54,12 @@ interface IPool {
      * @return The total supply of the token
      */
     function totalSupply() external view returns (uint256);
+
+    /**
+     * @notice Returns the data of the reserve
+     * @param asset The address of the underlying asset of the reserve
+     * @return The reserve's data
+    */
+    function getReserveData(address asset) external view returns (uint256, uint256, uint256, uint256, uint256, uint256, uint256, uint256, uint256, uint256, uint256, uint256);
 }
 
