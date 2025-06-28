@@ -6,7 +6,7 @@ import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {IPool} from "./interfaces/external/IPool.sol";
 import {IAToken} from "./interfaces/external/IAToken.sol";
-import {IUSDCPermit} from "./interfaces/IUSDCPermit.sol";
+import {IPermit} from "./interfaces/external/IPermit.sol";
 
 /**
  * @title VaquitaPool
@@ -17,38 +17,42 @@ contract VaquitaPool is Ownable {
 
     // Position struct to store user position information
     struct Position {
-        bytes32 id;
+        bytes16 id;
         address owner;
         uint256 amount;
-        uint256 aTokensReceived;
+        uint256 liquidityIndex;  // Aave's liquidity index at deposit time
         uint256 entryTime;
         uint256 finalizationTime;
         bool isActive;
     }
 
     // State variables
-    IERC20 public immutable token;
-    IPool public immutable aavePool;
-    IAToken public immutable aToken;
+    IERC20 public token;
+    IPool public aavePool;
+    IAToken public aToken;
     
     uint256 public lockPeriod = 1 days;
     uint256 public constant BASIS_POINTS = 10000;
-    uint256 public earlyWithdrawalFee = 0; // Fee for early withdrawals (initially 0)
+    uint256 public constant RAY = 1e27; // Aave uses RAY precision for liquidity index
+    uint256 public earlyWithdrawalFee = 0;
     
     uint256 public totalDeposits;
     uint256 public rewardPool;
-    uint256 public protocolFees;  // New state variable for protocol fees
+    uint256 public protocolFees;
     
     // Mappings
-    mapping(bytes32 => Position) public positions;
+    mapping(bytes16 => Position) public positions;
     mapping(address => uint256) public userTotalDeposits;
 
     // Events
-    event FundsDeposited(bytes32 indexed depositId, address indexed owner, uint256 amount, uint256 aTokensReceived);
-    event FundsWithdrawn(bytes32 indexed depositId, address indexed owner, uint256 amount, uint256 reward);
-    event RewardDistributed(bytes32 indexed depositId, address indexed owner, uint256 reward);
+    event FundsDeposited(bytes16 indexed depositId, address indexed owner, uint256 amount);
+    event FundsWithdrawn(bytes16 indexed depositId, address indexed owner, uint256 amount, uint256 interest, uint256 reward);
+    event RewardDistributed(bytes16 indexed depositId, address indexed owner, uint256 reward);
     event LockPeriodUpdated(uint256 newLockPeriod);
     event EarlyWithdrawalFeeUpdated(uint256 newFee);
+    event RewardsAdded(uint256 rewardAmount);
+    event ProtocolFeesUpdated(uint256 newProtocolFees);
+    event ProtocolFeesWithdrawn(uint256 protocolFees);
 
     // Errors
     error InvalidAmount();
@@ -59,6 +63,7 @@ contract VaquitaPool is Ownable {
     error InvalidAddress();
     error InvalidFee();
     error InvalidDepositId();
+    error DepositAlreadyExists();
 
     constructor(
         address _token,
@@ -66,36 +71,11 @@ contract VaquitaPool is Ownable {
         address _aToken,
         uint256 _lockPeriod
     ) Ownable(msg.sender) {
-        if (_token == address(0) || _aavePool == address(0) || _aToken == address(0)) 
-            revert InvalidAddress();
-
         token = IERC20(_token);
         aavePool = IPool(_aavePool);
         aToken = IAToken(_aToken);
         lockPeriod = _lockPeriod;
-
-        // Verify aToken matches underlying token
-        if (aToken.UNDERLYING_ASSET_ADDRESS() != _token) 
-            revert InvalidAddress();
-    }
-
-    /**
-     * @dev Update the lock period
-     * @param newLockPeriod The new lock period in seconds
-     */
-    function updateLockPeriod(uint256 newLockPeriod) external onlyOwner {
-        lockPeriod = newLockPeriod;
-        emit LockPeriodUpdated(newLockPeriod);
-    }
-
-    /**
-     * @dev Update the early withdrawal fee
-     * @param newFee The new fee in basis points (0-10000)
-     */
-    function updateEarlyWithdrawalFee(uint256 newFee) external onlyOwner {
-        if (newFee > BASIS_POINTS) revert InvalidFee();
-        earlyWithdrawalFee = newFee;
-        emit EarlyWithdrawalFeeUpdated(newFee);
+        token.approve(address(aavePool), type(uint256).max);
     }
 
     /**
@@ -103,55 +83,58 @@ contract VaquitaPool is Ownable {
      * @param depositId The unique identifier for the position
      * @param amount The amount of tokens to deposit
      */
-    function deposit(bytes32 depositId, uint256 amount, uint256 deadline, bytes memory signature) external {
+    function deposit(bytes16 depositId, uint256 amount, uint256 deadline, bytes memory signature) external returns (uint256) {
         if (amount == 0) revert InvalidAmount();
-        if (depositId == bytes32(0)) revert InvalidDepositId();
-        if (positions[depositId].id != bytes32(0)) revert InvalidDepositId();
+        if (depositId == bytes16(0)) revert InvalidDepositId();
+        if (positions[depositId].id != bytes16(0)) revert DepositAlreadyExists();
 
-        try IUSDCPermit(address(token)).permit(
+        try IPermit(address(token)).permit(
             msg.sender, address(this), amount, deadline, signature
         ) {} catch {}
 
         // Transfer tokens from user
         token.safeTransferFrom(msg.sender, address(this), amount);
 
-        uint256 balanceBefore = aToken.balanceOf(address(this));
-
         // Supply to Aave
-        _supplyToAave(amount);
+        aavePool.supply(address(token), amount, address(this), 0);
 
-        uint256 aTokensReceived = aToken.balanceOf(address(this)) - balanceBefore;
+        // Get current liquidity index from Aave
+        uint256 currentLiquidityIndex = aToken.liquidityIndex();
 
-        // Create position
+        // Create position with liquidity index snapshot
         Position storage position = positions[depositId];
         position.id = depositId;
         position.owner = msg.sender;
         position.amount = amount;
-        position.aTokensReceived = aTokensReceived;
+        position.liquidityIndex = currentLiquidityIndex;
         position.entryTime = block.timestamp;
         position.finalizationTime = block.timestamp + lockPeriod;
         position.isActive = true;
 
-        // Update user info
+        // Update totals
         userTotalDeposits[msg.sender] += amount;
         totalDeposits += amount;
 
-        emit FundsDeposited(depositId, msg.sender, amount, aTokensReceived);
+        emit FundsDeposited(depositId, msg.sender, amount);
+        return amount;
     }
 
     /**
      * @dev Withdraw from a position
      * @param depositId The ID of the position to withdraw from
      */
-    function withdraw(bytes32 depositId) external {
+    function withdraw(bytes16 depositId) external {
         Position storage position = positions[depositId];
-        if (position.id == bytes32(0)) revert PositionNotFound();
+        if (position.id == bytes16(0)) revert PositionNotFound();
         if (!position.isActive) revert PositionAlreadyWithdrawn();
         if (position.owner != msg.sender) revert NotPositionOwner();
 
-        // Withdraw from Aave and get actual amount received
-        uint256 withdrawnAmount = aavePool.withdraw(address(token), position.amount, address(this));
-        uint256 interest = withdrawnAmount > position.amount ? withdrawnAmount - position.amount : 0;
+        // Calculate current value and interest for this specific position
+        uint256 currentValue = _calculateCurrentPositionValue(position.amount, position.liquidityIndex);
+        uint256 interest = currentValue > position.amount ? currentValue - position.amount : 0;
+
+        // Withdraw the current value from Aave
+        uint256 withdrawnAmount = _withdrawFromAave(currentValue);
 
         // Update position and user info
         position.isActive = false;
@@ -163,8 +146,8 @@ contract VaquitaPool is Ownable {
             // Early withdrawal - calculate fee and add remaining interest to reward pool
             uint256 feeAmount = (interest * earlyWithdrawalFee) / BASIS_POINTS;
             uint256 remainingInterest = interest - feeAmount;
-            rewardPool += remainingInterest;  // Only remaining interest goes to reward pool
-            protocolFees += feeAmount;        // Fees go to protocol fees
+            rewardPool += remainingInterest;
+            protocolFees += feeAmount;
             
             // Transfer only principal to user
             token.safeTransfer(msg.sender, position.amount);
@@ -177,7 +160,49 @@ contract VaquitaPool is Ownable {
             token.safeTransfer(msg.sender, totalWithdrawal);
         }
 
-        emit FundsWithdrawn(depositId, msg.sender, position.amount, reward);
+        emit FundsWithdrawn(depositId, msg.sender, position.amount, interest, reward);
+    }
+
+    /**
+     * @dev Calculate the current value of a position based on Aave's liquidity index
+     * @param principalAmount The original deposit amount
+     * @param entryLiquidityIndex The liquidity index when the position was created
+     * @return The current value including accrued interest
+     */
+    function _calculateCurrentPositionValue(uint256 principalAmount, uint256 entryLiquidityIndex) internal view returns (uint256) {
+        uint256 currentLiquidityIndex = aToken.liquidityIndex();
+        
+        // Calculate the current value: principal * (currentIndex / entryIndex)
+        return (principalAmount * currentLiquidityIndex) / entryLiquidityIndex;
+    }
+
+    /**
+     * @dev Get the current value and interest for a position
+     * @param depositId The ID of the position
+     * @return currentValue The current total value of the position
+     * @return interest The interest earned so far
+     */
+    function getPositionValue(bytes16 depositId) external view returns (uint256 currentValue, uint256 interest) {
+        Position storage position = positions[depositId];
+        if (position.id == bytes16(0)) revert PositionNotFound();
+        
+        currentValue = _calculateCurrentPositionValue(position.amount, position.liquidityIndex);
+        interest = currentValue > position.amount ? currentValue - position.amount : 0;
+    }
+
+    /**
+     * @dev Withdraw tokens from Aave
+     * @param amount The amount of underlying tokens to withdraw
+     * @return The actual amount of underlying tokens received
+     */
+    function _withdrawFromAave(uint256 amount) internal returns (uint256) {
+        uint256 balanceBefore = token.balanceOf(address(this));
+        
+        // Withdraw from Aave - amount represents underlying tokens to withdraw
+        aavePool.withdraw(address(token), amount, address(this));
+        
+        uint256 balanceAfter = token.balanceOf(address(this));
+        return balanceAfter - balanceBefore;
     }
 
     /**
@@ -185,15 +210,15 @@ contract VaquitaPool is Ownable {
      * @param depositId The ID of the position
      * @return positionOwner The position owner
      * @return positionAmount The position amount
-     * @return aTokensReceived The amount of aTokens received
+     * @return liquidityIndex The liquidity index at entry
      * @return entryTime The entry time
      * @return finalizationTime The finalization time
      * @return positionIsActive Whether the position is active
      */
-    function getPosition(bytes32 depositId) external view returns (
+    function getPosition(bytes16 depositId) external view returns (
         address positionOwner,
         uint256 positionAmount,
-        uint256 aTokensReceived,
+        uint256 liquidityIndex,
         uint256 entryTime,
         uint256 finalizationTime,
         bool positionIsActive
@@ -202,7 +227,7 @@ contract VaquitaPool is Ownable {
         return (
             position.owner,
             position.amount,
-            position.aTokensReceived,
+            position.liquidityIndex,
             position.entryTime,
             position.finalizationTime,
             position.isActive
@@ -219,41 +244,33 @@ contract VaquitaPool is Ownable {
         return (rewardPool * amount) / totalDeposits;
     }
 
-    /**
-     * @dev Supply tokens to Aave
-     * @param amount The amount to supply
-     */
-    function _supplyToAave(uint256 amount) internal {
-        token.approve(address(aavePool), amount);
-        aavePool.supply(address(token), amount, address(this), 0);
-    }
-
-    /**
-     * @dev Get the current reward pool distribution percentage
-     * @return The reward pool percentage (in basis points)
-     */
-    function getRewardPoolDistribution() external view returns (uint256) {
-        if (totalDeposits == 0) return 0;
-        return (rewardPool * BASIS_POINTS) / totalDeposits;
-    }
-
-    // function to withdraw protocol fees
+    // Owner functions remain the same...
     function withdrawProtocolFees() external onlyOwner {
         token.safeTransfer(owner(), protocolFees);
     }
-    // function to withdraw reward pool
+
     function withdrawRewardPool(uint256 rewardAmount) external onlyOwner {
         token.safeTransfer(owner(), rewardAmount);
         rewardPool -= rewardAmount;
     }
-    // function to update protocol fees
+
     function updateProtocolFees(uint256 newProtocolFees) external onlyOwner {
         protocolFees = newProtocolFees;
     }
-    // function to update reward pool
+
     function addRewards(uint256 rewardAmount) external onlyOwner {
-        // transfer funds from caller to the contract and add it to the reward pool
         token.safeTransferFrom(msg.sender, address(this), rewardAmount);
         rewardPool += rewardAmount;
     }
-} 
+
+    function updateLockPeriod(uint256 newLockPeriod) external onlyOwner {
+        lockPeriod = newLockPeriod;
+        emit LockPeriodUpdated(newLockPeriod);
+    }
+
+    function updateEarlyWithdrawalFee(uint256 newFee) external onlyOwner {
+        if (newFee > BASIS_POINTS) revert InvalidFee();
+        earlyWithdrawalFee = newFee;
+        emit EarlyWithdrawalFeeUpdated(newFee);
+    }
+}
