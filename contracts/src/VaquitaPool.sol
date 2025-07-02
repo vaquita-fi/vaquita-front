@@ -3,7 +3,9 @@ pragma solidity ^0.8.25;
 
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 import {IPool} from "./interfaces/external/IPool.sol";
 import {IAToken} from "./interfaces/external/IAToken.sol";
 import {IPermit} from "./interfaces/external/IPermit.sol";
@@ -12,7 +14,7 @@ import {IPermit} from "./interfaces/external/IPermit.sol";
  * @title VaquitaPool
  * @dev A protocol that allows users to deposit tokens, earn Aave interest, and participate in a reward pool
  */
-contract VaquitaPool is Ownable {
+contract VaquitaPool is Initializable, OwnableUpgradeable, PausableUpgradeable {
     using SafeERC20 for IERC20;
 
     // Position struct to store user position information
@@ -65,17 +67,27 @@ contract VaquitaPool is Ownable {
     error InvalidDepositId();
     error DepositAlreadyExists();
 
-    constructor(
+    function initialize(
         address _token,
         address _aavePool,
         address _aToken,
         uint256 _lockPeriod
-    ) Ownable(msg.sender) {
+    ) public initializer {
+        __Ownable_init(msg.sender);
+        __Pausable_init();
         token = IERC20(_token);
         aavePool = IPool(_aavePool);
         aToken = IAToken(_aToken);
         lockPeriod = _lockPeriod;
         token.approve(address(aavePool), type(uint256).max);
+    }
+
+    function pause() external onlyOwner {
+        _pause();
+    }
+
+    function unpause() external onlyOwner {
+        _unpause();
     }
 
     /**
@@ -96,7 +108,7 @@ contract VaquitaPool is Ownable {
         token.safeTransferFrom(msg.sender, address(this), amount);
 
         // Supply to Aave
-        aavePool.supply(address(token), amount, address(this), 0);
+        _supplyToAave(amount);
 
         // Get current liquidity index from Aave
         uint256 currentLiquidityIndex = _getLiquidityIndex();
@@ -189,6 +201,10 @@ contract VaquitaPool is Ownable {
         
         currentValue = _calculateCurrentPositionValue(position.amount, position.liquidityIndex);
         interest = currentValue > position.amount ? currentValue - position.amount : 0;
+    }
+
+    function _supplyToAave(uint256 amount) internal {
+        aavePool.supply(address(token), amount, address(this), 0);
     }
 
     /**

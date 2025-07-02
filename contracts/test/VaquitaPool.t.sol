@@ -17,7 +17,8 @@ contract VaquitaPoolTest is Test {
 
     function setUp() public {
         vm.createSelectFork(vm.rpcUrl("base-sepolia"), baseSepoliaForkBlock);
-        pool = new VaquitaPool(TOKEN, AAVE_POOL, ATOKEN, 1 days);
+        pool = new VaquitaPool();
+        pool.initialize(TOKEN, AAVE_POOL, ATOKEN, 1 days);
     }
 
     function test_withdrawEarly() public {
