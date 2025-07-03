@@ -9,4 +9,8 @@ interface IPermit {
         uint256 deadline,
         bytes memory signature
     ) external;
+
+    function DOMAIN_SEPARATOR() external view returns (bytes32);
+
+    function nonces(address owner) external view returns (uint256);
 }

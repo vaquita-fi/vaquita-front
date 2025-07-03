@@ -61,5 +61,34 @@ interface IPool {
      * @return The reserve's data
     */
     function getReserveData(address asset) external view returns (uint256, uint256, uint256, uint256, uint256, uint256, uint256, uint256, uint256, uint256, uint256, uint256);
+
+    /**
+     * @notice Borrows an `amount` of underlying asset from the reserve, receiving in return overlying aTokens.
+     * @param asset The address of the underlying asset to borrow
+     * @param amount The amount to be borrowed
+     * @param interestRateMode The interest rate mode at which the user wants to borrow: 0 for Stable, 1 for Variable
+     * @param referralCode Code used to register the integrator originating the operation, for potential rewards.
+     */
+     function borrow(
+        address asset,
+        uint256 amount,
+        uint256 interestRateMode,
+        uint16 referralCode,
+        address onBehalfOf
+    ) external;
+
+    /**
+     * @notice Repays a borrowed `amount` on a specific reserve, burning the equivalent debt tokens owned
+     * @param asset The address of the underlying asset to repay
+     * @param amount The amount to repay
+     * @param interestRateMode The interest rate mode at which the user wants to repay: 0 for Stable, 1 for Variable
+     * @param onBehalfOf The address that will repay the debt
+     */
+    function repay(
+        address asset,
+        uint256 amount,
+        uint256 interestRateMode,
+        address onBehalfOf
+    ) external returns (uint256);
 }
 
