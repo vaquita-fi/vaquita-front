@@ -39,7 +39,9 @@ contract VaquitaPoolTest is Test, TestUtils {
         lockPeriod = 1 days;
         aavePool = IPool(AAVE_POOL_ADDRESS);
         vaquita = new VaquitaPool();
-        vaquita.initialize(TOKEN_ADDRESS, AAVE_POOL_ADDRESS, lockPeriod);
+        uint256[] memory lockPeriodsArr = new uint256[](1);
+        lockPeriodsArr[0] = lockPeriod;
+        vaquita.initialize(TOKEN_ADDRESS, AAVE_POOL_ADDRESS, lockPeriodsArr);
         vm.startPrank(whale);
         token.transfer(alice, initialAmount);
         token.transfer(bob, initialAmount * 2);
@@ -55,7 +57,7 @@ contract VaquitaPoolTest is Test, TestUtils {
     ) public returns (uint256) {
         vm.startPrank(user);
         token.approve(address(vaquita), depositAmount);
-        uint256 shares = vaquita.deposit(depositId, depositAmount, block.timestamp + 1 hours, "");
+        uint256 shares = vaquita.deposit(depositId, depositAmount, lockPeriod, block.timestamp + 1 hours, "");
         vm.stopPrank();
         return shares;
     }
@@ -128,9 +130,9 @@ contract VaquitaPoolTest is Test, TestUtils {
         deposit(alice, aliceDepositId, initialAmount);
         
         // Verify the deposit was successful
-        (address positionOwner,, uint256 shares,,,) = vaquita.getPosition(aliceDepositId);
+        (address positionOwner, uint256 positionAmount,,,,,) = vaquita.getPosition(aliceDepositId);
         assertEq(positionOwner, alice);
-        assertGt(shares, 0);
+        assertEq(positionAmount, initialAmount);
         
         vm.stopPrank();
     }
@@ -146,7 +148,7 @@ contract VaquitaPoolTest is Test, TestUtils {
         deposit(alice, aliceDepositId, initialAmount);
         vm.warp(block.timestamp + lockPeriod);
         withdraw(alice, aliceDepositId);
-        (,,,,, bool isActive) = vaquita.getPosition(aliceDepositId);
+        (,,,,, bool isActive,) = vaquita.getPosition(aliceDepositId);
         assertFalse(isActive);
     }
 
@@ -154,11 +156,11 @@ contract VaquitaPoolTest is Test, TestUtils {
         vm.startPrank(owner);
         uint256 rewardAmount = 1000e6;
         uint256 ownerBalanceBefore = token.balanceOf(owner);
-        uint256 rewardPoolBefore = vaquita.rewardPool();
+        (uint256 rewardPoolBefore,) = vaquita.periods(lockPeriod);
         token.approve(address(vaquita), rewardAmount);
-        vaquita.addRewards(rewardAmount);
+        vaquita.addRewards(lockPeriod, rewardAmount);
         uint256 ownerBalanceAfter = token.balanceOf(owner);
-        uint256 rewardPoolAfter = vaquita.rewardPool();
+        (uint256 rewardPoolAfter,) = vaquita.periods(lockPeriod);
         assertEq(rewardPoolAfter, rewardPoolBefore + rewardAmount, "Reward pool should increase by rewardAmount");
         assertEq(ownerBalanceAfter, ownerBalanceBefore - rewardAmount, "Owner balance should decrease by rewardAmount");
         vm.stopPrank();
@@ -168,7 +170,7 @@ contract VaquitaPoolTest is Test, TestUtils {
         bytes16 aliceDepositId = bytes16(keccak256(abi.encodePacked(alice, block.timestamp)));
         uint256 aliceBalanceBefore = token.balanceOf(alice);
         uint256 aliceDepositAmount = deposit(alice, aliceDepositId, initialAmount);
-        (,,uint256 entryLiquidityIndex,,,) = vaquita.getPosition(aliceDepositId);
+        (,,uint256 entryLiquidityIndex,,,,) = vaquita.getPosition(aliceDepositId);
         assertEq(aliceDepositAmount, initialAmount, "Alice should deposit all her tokens");
         console.log("Vaquita token balance after deposit:", token.balanceOf(address(vaquita)));
 
@@ -180,14 +182,15 @@ contract VaquitaPoolTest is Test, TestUtils {
         uint256 aliceBalanceAfter = token.balanceOf(alice);
         console.log("Alice balance after withdraw:", aliceBalanceAfter);
 
-        (, uint256 liquidityIndex, , , , , , , , , , ) = aavePool.getReserveData(address(token));
+        (,uint256 liquidityIndex,,,,,,,,,,) = aavePool.getReserveData(address(token));
         uint256 currentValue = (aliceDepositAmount * liquidityIndex) / entryLiquidityIndex;
         uint256 interest = currentValue - aliceDepositAmount;
         console.log("Current value:", currentValue);
         console.log("Interest:", interest);
 
-        assertEq(vaquita.totalDeposits(), 0, "Total deposits should be 0");
-        assertEq(vaquita.rewardPool(), interest, "Reward pool should be 50e6");
+        (uint256 rewardPool, uint256 totalDeposits) = vaquita.periods(lockPeriod);
+        assertEq(totalDeposits, 0, "Total deposits should be 0");
+        assertEq(rewardPool, interest, "Reward pool should be 50e6");
         assertEq(aliceWithdrawal, initialAmount, "Alice should withdraw all her funds");
         assertEq(aliceBalanceBefore, aliceBalanceAfter, "Alice should not have lost any balance");
     }
@@ -200,7 +203,10 @@ contract VaquitaPoolTest is Test, TestUtils {
         uint256 rewardAmount = 300e6;
         vm.startPrank(owner);
         token.approve(address(vaquita), rewardAmount);
-        vaquita.addRewards(rewardAmount);
+        vaquita.addRewards(lockPeriod, rewardAmount);
+        (uint256 rewardPoolInContract,) = vaquita.periods(lockPeriod);
+        assertEq(rewardPoolInContract, rewardAmount, "Reward pool should be equal to rewardAmount");
+        assertEq(token.balanceOf(address(vaquita)), rewardAmount, "Vaquita should have the reward amount");
         vm.stopPrank();
 
         // Alice deposits
@@ -212,10 +218,9 @@ contract VaquitaPoolTest is Test, TestUtils {
 
         generateInterestAndWarpToTime(whale, token, AAVE_POOL_ADDRESS, 5_000_000e6, lockPeriod);
 
-        console.log("vaquita.rewardPool()", vaquita.rewardPool());
+        (uint256 rewardPool, uint256 totalDeposits) = vaquita.periods(lockPeriod);
 
-        uint256 rewardPool = vaquita.rewardPool();
-        uint256 totalDeposits = vaquita.totalDeposits();
+        console.log("vaquita.rewardPool()", rewardPool);
 
         uint256 aliceReward = aliceDepositAmount * rewardPool / totalDeposits;
         uint256 bobReward = bobDepositAmount * (rewardPool - aliceReward) / (totalDeposits - aliceDepositAmount);
@@ -225,7 +230,8 @@ contract VaquitaPoolTest is Test, TestUtils {
         console.log("Alice current value:", aliceCurrentValue);
         console.log("Alice interest:", aliceInterest);
         uint256 aliceBalanceBefore = token.balanceOf(alice);
-        withdraw(alice, aliceDepositId);
+        uint256 aliceWithdrawal = withdraw(alice, aliceDepositId);
+        console.log("Alice withdrawal:", aliceWithdrawal);
         uint256 aliceBalanceAfter = token.balanceOf(alice);
         
         // Bob withdraws (should get 2/3 of remaining reward pool)
@@ -254,8 +260,8 @@ contract VaquitaPoolTest is Test, TestUtils {
         // Verify both users got more than they deposited
         assertGt(aliceTotal, initialAmount, "Alice should profit");
         assertGt(bobTotal, initialAmount * 2, "Bob should profit");
-        console.log("Reward pool:", vaquita.rewardPool());
-        assertEq(vaquita.rewardPool(), 0, "Reward pool should be 0");
+        (uint256 newRewardPool,) = vaquita.periods(lockPeriod);
+        assertEq(newRewardPool, 0, "Reward pool should be 0");
     }
 
     function test_WhaleGeneratesInterest() public {
@@ -268,7 +274,7 @@ contract VaquitaPoolTest is Test, TestUtils {
         uint256 aliceBalanceBefore = token.balanceOf(alice);
         console.log("Alice balance before deposit:", aliceBalanceBefore);
         
-        (, uint256 positionAmount,,,,) = vaquita.getPosition(aliceDepositId);
+        (, uint256 positionAmount,,,,,) = vaquita.getPosition(aliceDepositId);
         console.log("Position amount:", positionAmount);
 
         // Step 2: Generate interest
@@ -306,12 +312,13 @@ contract VaquitaPoolTest is Test, TestUtils {
         
         // Step 4: Additional verification
         console.log("\n=== Final State Check ===");
-        console.log("VaquitaPool reward pool:", vaquita.rewardPool());
+        (uint256 rewardPool, uint256 totalDeposits) = vaquita.periods(lockPeriod);
+        console.log("VaquitaPool reward pool:", rewardPool);
         console.log("VaquitaPool protocol fees:", vaquita.protocolFees());
-        console.log("VaquitaPool total deposits:", vaquita.totalDeposits());
+        console.log("VaquitaPool total deposits:", totalDeposits);
         
         // Check if the position is now inactive
-        (,,,,, bool isActive) = vaquita.getPosition(aliceDepositId);
+        (,,,,,bool isActive,) = vaquita.getPosition(aliceDepositId);
         assertFalse(isActive, "Position should be inactive after withdrawal");
     }
 
@@ -328,10 +335,11 @@ contract VaquitaPoolTest is Test, TestUtils {
         // Charlie deposits
         uint256 charlieShares = deposit(charlie, charlieDepositId, initialAmount);
 
-        assertEq(aliceShares + bobShares + charlieShares, vaquita.totalDeposits(), "Total shares should be 3 * initialAmount");
+        (, uint256 totalDeposits) = vaquita.periods(lockPeriod);
+        assertEq(aliceShares + bobShares + charlieShares, totalDeposits, "Total shares should be 3 * initialAmount");
         
-        console.log("Total deposits of vaquita", vaquita.totalDeposits());
-        assertEq(vaquita.totalDeposits(), 3 * initialAmount, "Total deposits should be 3 * initialAmount");
+        console.log("Total deposits of vaquita", totalDeposits);
+        assertEq(totalDeposits, 3 * initialAmount, "Total deposits should be 3 * initialAmount");
         
         // Whale makes multiple borrows and repayments to generate interest
         for (uint i = 0; i < 3; i++) {
@@ -378,7 +386,7 @@ contract VaquitaPoolTest is Test, TestUtils {
         vm.prank(alice);
         token.approve(address(vaquita), 1e6);
         vm.expectRevert();
-        vaquita.deposit(bytes16(keccak256("id1")), 1e6, block.timestamp + 1 days, "");
+        vaquita.deposit(bytes16(keccak256("id1")), 1e6, 1 days, block.timestamp + 1 days, "");
 
         // Withdraw should revert when paused
         vm.expectRevert();
@@ -387,7 +395,7 @@ contract VaquitaPoolTest is Test, TestUtils {
         // addRewards should revert when paused
         vm.prank(owner);
         vm.expectRevert();
-        vaquita.addRewards(1e6);
+        vaquita.addRewards(1 days, 1e6);
 
         // withdrawProtocolFees should revert when paused
         vm.prank(owner);
@@ -426,12 +434,13 @@ contract VaquitaPoolTest is Test, TestUtils {
         // Only owner can update
         vm.prank(alice);
         vm.expectRevert(abi.encodeWithSelector(Ownable.OwnableUnauthorizedAccount.selector, alice));
-        vaquita.updateLockPeriod(2 days);
+        vaquita.addLockPeriod(2 days);
 
         // Owner can update
         vm.prank(owner);
-        vaquita.updateLockPeriod(2 days);
-        assertEq(vaquita.lockPeriod(), 2 days, "Lock period should be updated");
+        vaquita.addLockPeriod(2 days);
+        // lock period 2 days should be added
+        assertEq(vaquita.lockPeriods(1), 2 days, "Lock period 2 days should be added");
     }
 
     function test_WithdrawProtocolFees() public {

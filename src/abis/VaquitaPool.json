@@ -1,31 +1,5 @@
 [
   {
-    "type": "constructor",
-    "inputs": [
-      {
-        "name": "_token",
-        "type": "address",
-        "internalType": "address"
-      },
-      {
-        "name": "_aavePool",
-        "type": "address",
-        "internalType": "address"
-      },
-      {
-        "name": "_aToken",
-        "type": "address",
-        "internalType": "address"
-      },
-      {
-        "name": "_lockPeriod",
-        "type": "uint256",
-        "internalType": "uint256"
-      }
-    ],
-    "stateMutability": "nonpayable"
-  },
-  {
     "type": "function",
     "name": "BASIS_POINTS",
     "inputs": [],
@@ -40,13 +14,13 @@
   },
   {
     "type": "function",
-    "name": "aToken",
+    "name": "RAY",
     "inputs": [],
     "outputs": [
       {
         "name": "",
-        "type": "address",
-        "internalType": "contract IAToken"
+        "type": "uint256",
+        "internalType": "uint256"
       }
     ],
     "stateMutability": "view"
@@ -66,8 +40,26 @@
   },
   {
     "type": "function",
+    "name": "addLockPeriod",
+    "inputs": [
+      {
+        "name": "newLockPeriod",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
     "name": "addRewards",
     "inputs": [
+      {
+        "name": "period",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
       {
         "name": "rewardAmount",
         "type": "uint256",
@@ -83,11 +75,16 @@
     "inputs": [
       {
         "name": "depositId",
-        "type": "bytes32",
-        "internalType": "bytes32"
+        "type": "bytes16",
+        "internalType": "bytes16"
       },
       {
         "name": "amount",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "period",
         "type": "uint256",
         "internalType": "uint256"
       },
@@ -102,7 +99,13 @@
         "internalType": "bytes"
       }
     ],
-    "outputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
     "stateMutability": "nonpayable"
   },
   {
@@ -124,8 +127,8 @@
     "inputs": [
       {
         "name": "depositId",
-        "type": "bytes32",
-        "internalType": "bytes32"
+        "type": "bytes16",
+        "internalType": "bytes16"
       }
     ],
     "outputs": [
@@ -140,7 +143,7 @@
         "internalType": "uint256"
       },
       {
-        "name": "aTokensReceived",
+        "name": "liquidityIndex",
         "type": "uint256",
         "internalType": "uint256"
       },
@@ -158,13 +161,84 @@
         "name": "positionIsActive",
         "type": "bool",
         "internalType": "bool"
+      },
+      {
+        "name": "period",
+        "type": "uint256",
+        "internalType": "uint256"
       }
     ],
     "stateMutability": "view"
   },
   {
     "type": "function",
-    "name": "getRewardPoolDistribution",
+    "name": "getPositionValue",
+    "inputs": [
+      {
+        "name": "depositId",
+        "type": "bytes16",
+        "internalType": "bytes16"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "currentValue",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "interest",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "initialize",
+    "inputs": [
+      {
+        "name": "_token",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "_aavePool",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "_lockPeriods",
+        "type": "uint256[]",
+        "internalType": "uint256[]"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "isSupportedLockPeriod",
+    "inputs": [
+      {
+        "name": "period",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "bool",
+        "internalType": "bool"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "lockPeriod",
     "inputs": [],
     "outputs": [
       {
@@ -177,8 +251,14 @@
   },
   {
     "type": "function",
-    "name": "lockPeriod",
-    "inputs": [],
+    "name": "lockPeriods",
+    "inputs": [
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
     "outputs": [
       {
         "name": "",
@@ -203,19 +283,63 @@
   },
   {
     "type": "function",
+    "name": "pause",
+    "inputs": [],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "paused",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "bool",
+        "internalType": "bool"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "periods",
+    "inputs": [
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "rewardPool",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "totalDeposits",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
     "name": "positions",
     "inputs": [
       {
         "name": "",
-        "type": "bytes32",
-        "internalType": "bytes32"
+        "type": "bytes16",
+        "internalType": "bytes16"
       }
     ],
     "outputs": [
       {
         "name": "id",
-        "type": "bytes32",
-        "internalType": "bytes32"
+        "type": "bytes16",
+        "internalType": "bytes16"
       },
       {
         "name": "owner",
@@ -228,7 +352,7 @@
         "internalType": "uint256"
       },
       {
-        "name": "aTokensReceived",
+        "name": "liquidityIndex",
         "type": "uint256",
         "internalType": "uint256"
       },
@@ -246,6 +370,11 @@
         "name": "isActive",
         "type": "bool",
         "internalType": "bool"
+      },
+      {
+        "name": "lockPeriod",
+        "type": "uint256",
+        "internalType": "uint256"
       }
     ],
     "stateMutability": "view"
@@ -324,36 +453,17 @@
   },
   {
     "type": "function",
+    "name": "unpause",
+    "inputs": [],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
     "name": "updateEarlyWithdrawalFee",
     "inputs": [
       {
         "name": "newFee",
-        "type": "uint256",
-        "internalType": "uint256"
-      }
-    ],
-    "outputs": [],
-    "stateMutability": "nonpayable"
-  },
-  {
-    "type": "function",
-    "name": "updateLockPeriod",
-    "inputs": [
-      {
-        "name": "newLockPeriod",
-        "type": "uint256",
-        "internalType": "uint256"
-      }
-    ],
-    "outputs": [],
-    "stateMutability": "nonpayable"
-  },
-  {
-    "type": "function",
-    "name": "updateProtocolFees",
-    "inputs": [
-      {
-        "name": "newProtocolFees",
         "type": "uint256",
         "internalType": "uint256"
       }
@@ -382,34 +492,51 @@
   },
   {
     "type": "function",
+    "name": "userTotalDepositsPerLockPeriod",
+    "inputs": [
+      {
+        "name": "",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
     "name": "withdraw",
     "inputs": [
       {
         "name": "depositId",
-        "type": "bytes32",
-        "internalType": "bytes32"
+        "type": "bytes16",
+        "internalType": "bytes16"
       }
     ],
-    "outputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
     "stateMutability": "nonpayable"
   },
   {
     "type": "function",
     "name": "withdrawProtocolFees",
     "inputs": [],
-    "outputs": [],
-    "stateMutability": "nonpayable"
-  },
-  {
-    "type": "function",
-    "name": "withdrawRewardPool",
-    "inputs": [
-      {
-        "name": "rewardAmount",
-        "type": "uint256",
-        "internalType": "uint256"
-      }
-    ],
     "outputs": [],
     "stateMutability": "nonpayable"
   },
@@ -432,9 +559,9 @@
     "inputs": [
       {
         "name": "depositId",
-        "type": "bytes32",
+        "type": "bytes16",
         "indexed": true,
-        "internalType": "bytes32"
+        "internalType": "bytes16"
       },
       {
         "name": "owner",
@@ -449,7 +576,7 @@
         "internalType": "uint256"
       },
       {
-        "name": "aTokensReceived",
+        "name": "lockPeriod",
         "type": "uint256",
         "indexed": false,
         "internalType": "uint256"
@@ -463,9 +590,9 @@
     "inputs": [
       {
         "name": "depositId",
-        "type": "bytes32",
+        "type": "bytes16",
         "indexed": true,
-        "internalType": "bytes32"
+        "internalType": "bytes16"
       },
       {
         "name": "owner",
@@ -480,10 +607,35 @@
         "internalType": "uint256"
       },
       {
+        "name": "interest",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      },
+      {
         "name": "reward",
         "type": "uint256",
         "indexed": false,
         "internalType": "uint256"
+      },
+      {
+        "name": "lockPeriod",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "Initialized",
+    "inputs": [
+      {
+        "name": "version",
+        "type": "uint64",
+        "indexed": false,
+        "internalType": "uint64"
       }
     ],
     "anonymous": false
@@ -522,13 +674,52 @@
   },
   {
     "type": "event",
+    "name": "Paused",
+    "inputs": [
+      {
+        "name": "account",
+        "type": "address",
+        "indexed": false,
+        "internalType": "address"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "ProtocolFeesUpdated",
+    "inputs": [
+      {
+        "name": "newProtocolFees",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "ProtocolFeesWithdrawn",
+    "inputs": [
+      {
+        "name": "protocolFees",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
     "name": "RewardDistributed",
     "inputs": [
       {
         "name": "depositId",
-        "type": "bytes32",
+        "type": "bytes16",
         "indexed": true,
-        "internalType": "bytes32"
+        "internalType": "bytes16"
       },
       {
         "name": "owner",
@@ -541,9 +732,62 @@
         "type": "uint256",
         "indexed": false,
         "internalType": "uint256"
+      },
+      {
+        "name": "lockPeriod",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
       }
     ],
     "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "RewardsAdded",
+    "inputs": [
+      {
+        "name": "rewardAmount",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      },
+      {
+        "name": "lockPeriod",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "Unpaused",
+    "inputs": [
+      {
+        "name": "account",
+        "type": "address",
+        "indexed": false,
+        "internalType": "address"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "error",
+    "name": "DepositAlreadyExists",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "EnforcedPause",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "ExpectedPause",
+    "inputs": []
   },
   {
     "type": "error",
@@ -563,6 +807,21 @@
   {
     "type": "error",
     "name": "InvalidFee",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "InvalidInitialization",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "InvalidLockPeriod",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "NotInitializing",
     "inputs": []
   },
   {

@@ -26,43 +26,32 @@ contract VaquitaPool is Initializable, OwnableUpgradeable, PausableUpgradeable {
         uint256 entryTime;
         uint256 finalizationTime;
         bool isActive;
-        uint256 lockPeriod;
-    }
-
-    // Struct to store per-lockPeriod data
-    struct Period {
-        uint256 rewardPool;
-        uint256 totalDeposits;
     }
 
     // State variables
     IERC20 public token;
     IPool public aavePool;
     
-    // --- Deprecated variables, kept for upgrade safety ---
-    uint256 public lockPeriod; // deprecated, use per-position lockPeriod
+    uint256 public lockPeriod = 1 days;
     uint256 public constant BASIS_POINTS = 10000;
-    uint256 public constant RAY = 1e27; // deprecated, not used
+    uint256 public constant RAY = 1e27; // Aave uses RAY precision for liquidity index
     uint256 public earlyWithdrawalFee = 0;
-    uint256 public totalDeposits; // deprecated, use periods mapping
-    uint256 public rewardPool;    // deprecated, use periods mapping
+    
+    uint256 public totalDeposits;
+    uint256 public rewardPool;
     uint256 public protocolFees;
+    
+    // Mappings
     mapping(bytes16 => Position) public positions;
-    mapping(address => uint256) public userTotalDeposits; // deprecated, use userTotalDepositsPerLockPeriod
-    // --- End deprecated variables ---
-
-    // New variables appended for upgrade safety
-    uint256[] public lockPeriods; // Supported lock periods
-    mapping(uint256 => Period) public periods; // lockPeriod => Period
-    mapping(address => mapping(uint256 => uint256)) public userTotalDepositsPerLockPeriod; // user => lockPeriod => total deposits
+    mapping(address => uint256) public userTotalDeposits;
 
     // Events
-    event FundsDeposited(bytes16 indexed depositId, address indexed owner, uint256 amount, uint256 lockPeriod);
-    event FundsWithdrawn(bytes16 indexed depositId, address indexed owner, uint256 amount, uint256 interest, uint256 reward, uint256 lockPeriod);
-    event RewardDistributed(bytes16 indexed depositId, address indexed owner, uint256 reward, uint256 lockPeriod);
+    event FundsDeposited(bytes16 indexed depositId, address indexed owner, uint256 amount);
+    event FundsWithdrawn(bytes16 indexed depositId, address indexed owner, uint256 amount, uint256 interest, uint256 reward);
+    event RewardDistributed(bytes16 indexed depositId, address indexed owner, uint256 reward);
     event LockPeriodUpdated(uint256 newLockPeriod);
     event EarlyWithdrawalFeeUpdated(uint256 newFee);
-    event RewardsAdded(uint256 rewardAmount, uint256 lockPeriod);
+    event RewardsAdded(uint256 rewardAmount);
     event ProtocolFeesUpdated(uint256 newProtocolFees);
     event ProtocolFeesWithdrawn(uint256 protocolFees);
 
@@ -76,26 +65,23 @@ contract VaquitaPool is Initializable, OwnableUpgradeable, PausableUpgradeable {
     error InvalidFee();
     error InvalidDepositId();
     error DepositAlreadyExists();
-    error InvalidLockPeriod();
 
     /**
-     * @notice Initializes the VaquitaPool contract with the given token, Aave pool, and lock periods.
+     * @notice Initializes the VaquitaPool contract with the given token, Aave pool, and lock period.
      * @param _token The address of the ERC20 token to be used for deposits.
      * @param _aavePool The address of the Aave pool contract.
-     * @param _lockPeriods The array of supported lock periods (in seconds).
+     * @param _lockPeriod The lock period (in seconds) for deposits.
      */
     function initialize(
         address _token,
         address _aavePool,
-        uint256[] memory _lockPeriods
+        uint256 _lockPeriod
     ) public initializer {
         __Ownable_init(msg.sender);
         __Pausable_init();
         token = IERC20(_token);
         aavePool = IPool(_aavePool);
-        for (uint256 i = 0; i < _lockPeriods.length; i++) {
-            lockPeriods.push(_lockPeriods[i]);
-        }
+        lockPeriod = _lockPeriod;
         token.approve(address(aavePool), type(uint256).max);
     }
 
@@ -116,23 +102,10 @@ contract VaquitaPool is Initializable, OwnableUpgradeable, PausableUpgradeable {
     }
 
     /**
-     * @notice Checks if a lock period is supported.
-     * @param period The lock period to check.
-     * @return True if supported, false otherwise.
-     */
-    function isSupportedLockPeriod(uint256 period) public view returns (bool) {
-        for (uint256 i = 0; i < lockPeriods.length; i++) {
-            if (lockPeriods[i] == period) return true;
-        }
-        return false;
-    }
-
-    /**
      * @notice Opens a new position by depositing tokens into the pool.
      * @dev Uses permit if available, then transfers tokens and supplies to Aave.
      * @param depositId The unique identifier for the position.
      * @param amount The amount of tokens to deposit.
-     * @param period The lock period chosen for this deposit.
      * @param deadline The deadline for the permit signature.
      * @param signature The permit signature for token approval.
      * @return The amount deposited.
@@ -143,11 +116,10 @@ contract VaquitaPool is Initializable, OwnableUpgradeable, PausableUpgradeable {
      * - `amount` must be greater than 0.
      * - `depositId` must not be zero or already used.
      */
-    function deposit(bytes16 depositId, uint256 amount, uint256 period, uint256 deadline, bytes memory signature) external whenNotPaused returns (uint256) {
+    function deposit(bytes16 depositId, uint256 amount, uint256 deadline, bytes memory signature) external whenNotPaused returns (uint256) {
         if (amount == 0) revert InvalidAmount();
         if (depositId == bytes16(0)) revert InvalidDepositId();
         if (positions[depositId].id != bytes16(0)) revert DepositAlreadyExists();
-        if (!isSupportedLockPeriod(period)) revert InvalidLockPeriod();
 
         try IPermit(address(token)).permit(
             msg.sender, address(this), amount, deadline, signature
@@ -169,15 +141,14 @@ contract VaquitaPool is Initializable, OwnableUpgradeable, PausableUpgradeable {
         position.amount = amount;
         position.liquidityIndex = currentLiquidityIndex;
         position.entryTime = block.timestamp;
-        position.finalizationTime = block.timestamp + period;
-        position.lockPeriod = period;
+        position.finalizationTime = block.timestamp + lockPeriod;
         position.isActive = true;
 
         // Update totals
-        userTotalDepositsPerLockPeriod[msg.sender][period] += amount;
-        periods[period].totalDeposits += amount;
+        userTotalDeposits[msg.sender] += amount;
+        totalDeposits += amount;
 
-        emit FundsDeposited(depositId, msg.sender, amount, period);
+        emit FundsDeposited(depositId, msg.sender, amount);
         return amount;
     }
 
@@ -198,8 +169,6 @@ contract VaquitaPool is Initializable, OwnableUpgradeable, PausableUpgradeable {
         if (!position.isActive) revert PositionAlreadyWithdrawn();
         if (position.owner != msg.sender) revert NotPositionOwner();
 
-        uint256 period = position.lockPeriod;
-
         console.log("Position amount:", position.amount);
         console.log("Position liquidity index:", position.liquidityIndex);
 
@@ -215,39 +184,36 @@ contract VaquitaPool is Initializable, OwnableUpgradeable, PausableUpgradeable {
         console.log("Withdrawn amount:", withdrawnAmount);
         console.log("Contract balance after withdraw:", token.balanceOf(address(this)));
 
+        // Update position and user info
+        position.isActive = false;
+        userTotalDeposits[msg.sender] -= position.amount;
+
         uint256 reward = 0;
         uint256 amountToTransfer = 0;
         if (block.timestamp < position.finalizationTime) {
             // Early withdrawal - calculate fee and add remaining interest to reward pool
             uint256 feeAmount = (interest * earlyWithdrawalFee) / BASIS_POINTS;
             uint256 remainingInterest = interest - feeAmount;
-            periods[period].rewardPool += remainingInterest;
+            rewardPool += remainingInterest;
             protocolFees += feeAmount;
             amountToTransfer = withdrawnAmount - interest;
-            // Update position and user info
-            position.isActive = false;
-            userTotalDepositsPerLockPeriod[msg.sender][period] -= position.amount;
-            periods[period].totalDeposits -= position.amount;
+            totalDeposits -= position.amount;
             
             // Transfer only principal to user
             console.log("Vaquita token balance:", token.balanceOf(address(this)));
             token.safeTransfer(msg.sender, amountToTransfer);
         } else {
             // Late withdrawal - calculate and distribute rewards
-            reward = _calculateReward(position.amount, period);
-            console.log("Reward for user ", msg.sender, " is ", reward);
+            reward = _calculateReward(position.amount);
             amountToTransfer = withdrawnAmount + reward;
-            periods[period].rewardPool -= reward;
-            // Update position and user info
-            position.isActive = false;
-            userTotalDepositsPerLockPeriod[msg.sender][period] -= position.amount;
-            periods[period].totalDeposits -= position.amount;
+            rewardPool -= reward;
+            totalDeposits -= position.amount;
             
             console.log("Vaquita token balance:", token.balanceOf(address(this)));
             token.safeTransfer(msg.sender, amountToTransfer);
         }
 
-        emit FundsWithdrawn(depositId, msg.sender, position.amount, interest, reward, period);
+        emit FundsWithdrawn(depositId, msg.sender, position.amount, interest, reward);
         return amountToTransfer;
     }
 
@@ -324,7 +290,6 @@ contract VaquitaPool is Initializable, OwnableUpgradeable, PausableUpgradeable {
      * @return entryTime The entry time.
      * @return finalizationTime The finalization time.
      * @return positionIsActive Whether the position is active.
-     * @return period The lock period for this position.
      */
     function getPosition(bytes16 depositId) external view returns (
         address positionOwner,
@@ -332,8 +297,7 @@ contract VaquitaPool is Initializable, OwnableUpgradeable, PausableUpgradeable {
         uint256 liquidityIndex,
         uint256 entryTime,
         uint256 finalizationTime,
-        bool positionIsActive,
-        uint256 period
+        bool positionIsActive
     ) {
         Position storage position = positions[depositId];
         return (
@@ -342,24 +306,19 @@ contract VaquitaPool is Initializable, OwnableUpgradeable, PausableUpgradeable {
             position.liquidityIndex,
             position.entryTime,
             position.finalizationTime,
-            position.isActive,
-            position.lockPeriod
+            position.isActive
         );
     }
 
     /**
-     * @notice Calculates the reward for a position based on the current reward pool and total deposits for the lock period.
+     * @notice Calculates the reward for a position based on the current reward pool and total deposits.
      * @dev Internal view function.
      * @param amount The position amount.
-     * @param period The lock period for this position.
      * @return The calculated reward.
      */
-    function _calculateReward(uint256 amount, uint256 period) internal view returns (uint256) {
-        uint256 totalDepositsForPeriod = periods[period].totalDeposits;
-        console.log("Total deposits for period ", period, " is ", totalDepositsForPeriod);
-        console.log("Reward pool for period ", period, " is ", periods[period].rewardPool);
-        if (totalDepositsForPeriod == 0) return 0;
-        return (periods[period].rewardPool * amount) / totalDepositsForPeriod;
+    function _calculateReward(uint256 amount) internal view returns (uint256) {
+        if (totalDeposits == 0) return 0;
+        return (rewardPool * amount) / totalDeposits;
     }
 
     /**
@@ -374,17 +333,26 @@ contract VaquitaPool is Initializable, OwnableUpgradeable, PausableUpgradeable {
     }
 
     /**
-     * @notice Adds rewards to the reward pool for a specific lock period.
+     * @notice Adds rewards to the reward pool.
      * @dev Only callable by the contract owner. Transfers tokens from the owner to the contract.
      * Emits a {RewardsAdded} event.
-     * @param period The lock period to add rewards to.
      * @param rewardAmount The amount of tokens to add to the reward pool.
      */
-    function addRewards(uint256 period, uint256 rewardAmount) external onlyOwner {
-        if (!isSupportedLockPeriod(period)) revert InvalidLockPeriod();
+    function addRewards(uint256 rewardAmount) external onlyOwner {
         token.safeTransferFrom(msg.sender, address(this), rewardAmount);
-        periods[period].rewardPool += rewardAmount;
-        emit RewardsAdded(rewardAmount, period);
+        rewardPool += rewardAmount;
+        emit RewardsAdded(rewardAmount);
+    }
+
+    /**
+     * @notice Updates the lock period for new deposits.
+     * @dev Only callable by the contract owner.
+     * Emits a {LockPeriodUpdated} event.
+     * @param newLockPeriod The new lock period in seconds.
+     */
+    function updateLockPeriod(uint256 newLockPeriod) external onlyOwner {
+        lockPeriod = newLockPeriod;
+        emit LockPeriodUpdated(newLockPeriod);
     }
 
     /**
@@ -397,15 +365,5 @@ contract VaquitaPool is Initializable, OwnableUpgradeable, PausableUpgradeable {
         if (newFee > BASIS_POINTS) revert InvalidFee();
         earlyWithdrawalFee = newFee;
         emit EarlyWithdrawalFeeUpdated(newFee);
-    }
-
-    /**
-     * @notice Adds a new lock period to the supported list.
-     * @dev Only callable by the contract owner.
-     * @param newLockPeriod The new lock period in seconds.
-     */
-    function addLockPeriod(uint256 newLockPeriod) external onlyOwner {
-        require(!isSupportedLockPeriod(newLockPeriod), "Lock period already supported");
-        lockPeriods.push(newLockPeriod);
     }
 }
