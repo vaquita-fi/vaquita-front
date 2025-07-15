@@ -1,15 +1,15 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.25;
+pragma solidity 0.8.30;
 
 import {Test} from "forge-std/Test.sol";
-import {VaquitaPool} from "../src/VaquitaPool.sol";
-import {ERC20Mock} from "../lib/openzeppelin-contracts/contracts/mocks/token/ERC20Mock.sol";
-import {IERC20} from "openzeppelin-contracts/contracts/interfaces/IERC20.sol";
+import {ERC20Mock} from "@openzeppelin/contracts/mocks/token/ERC20Mock.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {IPool} from "../src/interfaces/external/IPool.sol";
 import {IPermit} from "../src/interfaces/external/IPermit.sol";
-import {console} from "forge-std/console.sol";
+import {VaquitaPool} from "../src/VaquitaPool.sol";
 import {TestUtils} from "./TestUtils.sol";
-import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+import {console} from "forge-std/console.sol";
 
 contract VaquitaPoolTest is Test, TestUtils {
     VaquitaPool vaquita;
@@ -164,6 +164,20 @@ contract VaquitaPoolTest is Test, TestUtils {
         assertEq(rewardPoolAfter, rewardPoolBefore + rewardAmount, "Reward pool should increase by rewardAmount");
         assertEq(ownerBalanceAfter, ownerBalanceBefore - rewardAmount, "Owner balance should decrease by rewardAmount");
         vm.stopPrank();
+    }
+
+    function test_AddLockPeriod() public {
+        uint256 newLockPeriod = 7 days;
+        uint256 notSupportedLockPeriod = (1 weeks) * 4;
+        // Should not be supported initially
+        bool supportedBefore = vaquita.isSupportedLockPeriod(newLockPeriod);
+        assertFalse(supportedBefore, "New lock period should not be supported before adding");
+        // Add new lock period
+        vaquita.addLockPeriod(newLockPeriod);
+        // Should be supported after
+        bool supportedAfter = vaquita.isSupportedLockPeriod(newLockPeriod);
+        assertTrue(supportedAfter, "New lock period should be supported after adding");
+        assertFalse(vaquita.isSupportedLockPeriod(notSupportedLockPeriod), "Not supported lock period should not be supported");
     }
 
     function test_EarlyWithdrawal() public {
@@ -468,5 +482,15 @@ contract VaquitaPoolTest is Test, TestUtils {
         vm.prank(owner);
         vaquita.withdrawProtocolFees();
         assertEq(vaquita.protocolFees(), 0, "Protocol fees should be zero after withdrawal");
+    }
+
+    function test_WithdrawRewards() public {
+        // Set early withdrawal fee to 5%
+        vm.prank(owner);
+        vaquita.updateEarlyWithdrawalFee(500); // 5%
+
+        // Alice deposits
+        bytes16 aliceDepositId = bytes16(keccak256(abi.encodePacked(alice, block.timestamp)));
+        deposit(alice, aliceDepositId, initialAmount);
     }
 }

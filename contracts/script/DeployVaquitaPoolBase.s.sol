@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.25;
+pragma solidity 0.8.30;
 
 import {Script, console} from "forge-std/Script.sol";
 import {VaquitaPool} from "../src/VaquitaPool.sol";
-import {TransparentUpgradeableProxy} from "../lib/openzeppelin-contracts/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
-import {ProxyAdmin} from "../lib/openzeppelin-contracts/contracts/proxy/transparent/ProxyAdmin.sol";
+import {TransparentUpgradeableProxy} from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
+import {ProxyAdmin} from "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol";
 
 contract DeployVaquitaPoolBaseScript is Script {
     function run() public returns (address) {
@@ -19,12 +19,14 @@ contract DeployVaquitaPoolBaseScript is Script {
         // Encode initializer data
         address aavePool = 0xA238Dd80C259a72e81d7e4664a9801593F98d1c5; // Base Aave V3 Pool
         address token = 0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913; // Base USDC
-        uint256 lockPeriod = 1 days;
+        uint256 lockPeriod = 1 weeks;
+        uint256[] memory lockPeriods = new uint256[](1);
+        lockPeriods[0] = lockPeriod;
         bytes memory initData = abi.encodeWithSelector(
             implementation.initialize.selector,
             token,
             aavePool,
-            lockPeriod
+            lockPeriods
         );
 
         // Deploy proxy

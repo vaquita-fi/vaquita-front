@@ -1,6 +1,6 @@
 source .env
 
-forge script script/UpgradeVaquitaPool.s.sol:UpgradeVaquitaPoolScript \
+forge script script/velodrome/UpgradeVaquitaPool.s.sol:UpgradeVaquitaPoolScript \
  --rpc-url $RPC_URL \
  --etherscan-api-key $ETHERSCAN_API_KEY \
  --private-key $PRIVATE_KEY \
