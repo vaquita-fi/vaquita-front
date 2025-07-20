@@ -6,7 +6,7 @@ import {VaquitaPool} from "../src/VaquitaPool.sol";
 import {TransparentUpgradeableProxy} from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 import {ProxyAdmin} from "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol";
 
-contract DeployVaquitaPoolBaseScript is Script {
+contract DeployVaquitaPoolBaseSepoliaScript is Script {
     function run() public returns (address) {
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
         address owner = vm.addr(deployerPrivateKey);
