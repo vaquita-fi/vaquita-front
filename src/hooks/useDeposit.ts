@@ -119,7 +119,7 @@ export const useDeposit = () => {
         address: poolAddress as `0x${string}`,
         abi: VaquitaPool,
         functionName: "deposit",
-        args: [bytes32Value, parsedAmount, BigInt(deadline), parsedSignature],
+        args: [bytes32Value, parsedAmount, 604800, BigInt(deadline), parsedSignature],
       });
       
       await client.waitForTransactionReceipt({ hash: depositHash, confirmations: 1 });
