@@ -345,9 +345,10 @@ contract VaquitaPool is Initializable, OwnableUpgradeable, PausableUpgradeable, 
      * Emits a {ProtocolFeesWithdrawn} event.
      */
     function withdrawProtocolFees() external onlyOwner whenNotPaused {
+        uint256 cachedProtocolFees = protocolFees;
         protocolFees = 0;
-        token.safeTransfer(owner(), protocolFees);
-        emit ProtocolFeesWithdrawn(protocolFees);
+        token.safeTransfer(owner(), cachedProtocolFees);
+        emit ProtocolFeesWithdrawn(cachedProtocolFees);
     }
 
     /**

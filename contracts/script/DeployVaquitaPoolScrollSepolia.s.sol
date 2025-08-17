@@ -6,7 +6,7 @@ import {VaquitaPool} from "../src/VaquitaPool.sol";
 import {TransparentUpgradeableProxy} from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 import {ProxyAdmin} from "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol";
 
-contract DeployVaquitaPoolBaseSepoliaScript is Script {
+contract DeployVaquitaPoolScrollSepoliaScript is Script {
     function run() public returns (address) {
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
         address owner = vm.addr(deployerPrivateKey);
@@ -17,8 +17,8 @@ contract DeployVaquitaPoolBaseSepoliaScript is Script {
         console.log("VaquitaPool implementation:", address(implementation));
 
         // Encode initializer data
-        address aavePool = 0x07eA79F68B2B3df564D0A34F8e19D9B1e339814b; // Base Sepolia Aave V3 Pool
-        address token = 0x036CbD53842c5426634e7929541eC2318f3dCF7e; // Base Sepolia USDC
+        address aavePool = 0x48914C788295b5db23aF2b5F0B3BE775C4eA9440; // Scroll Sepolia Aave V3 Pool
+        address token = 0x2C9678042D52B97D27f2bD2947F7111d93F3dD0D; // Scroll Sepolia USDC
         uint256 lockPeriod = 1 weeks;
         uint256[] memory lockPeriods = new uint256[](1);
         lockPeriods[0] = lockPeriod;
