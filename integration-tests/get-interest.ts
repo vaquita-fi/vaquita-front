@@ -191,6 +191,9 @@ const aavePool = new ethers.Contract(aavePoolAddress, aavePoolAbi, signer);
 async function getAaveInterest() {
     // 1. get deposit details
     const deposit = await vaquitaPool.positions(depositIdHex);
+    console.log("deposit", deposit);
+    console.log("depositIdHex", depositIdHex);
+    console.log("deposit.amount", deposit.amount);
 
     // 2. get aave liquidity index
     const aaveReserveData = await aavePool.getReserveData(usdcAddress);
@@ -205,7 +208,7 @@ async function getAaveInterest() {
 async function getVaquitaInterest() {
     const deposit = await vaquitaPool.positions(depositIdHex);
     const period = await vaquitaPool.periods(deposit.lockPeriod);
-    const interest = Number(period.totalDeposits) * Number(deposit.amount) / Number(period.totalDeposits);
+    const interest = Number(period.rewardPool) * Number(deposit.amount) / Number(period.totalDeposits);
     const apy = (Number(interest) * 100) / Number(deposit.amount);
     console.log("vaquita interest", interest / 1e6);
     console.log("vaquita apy", apy, '%');
