@@ -196,15 +196,19 @@ async function getAaveInterest() {
     const aaveReserveData = await aavePool.getReserveData(usdcAddress);
 
     const positionValue = (deposit.amount * aaveReserveData.liquidityIndex) / deposit.liquidityIndex;
-    const interest = positionValue - deposit.amount;
+    const interest = Number(positionValue) - Number(deposit.amount);
+    const apy = (Number(interest) * 100) / Number(deposit.amount);
     console.log("aave interest", interest);
+    console.log("aave apy", apy, '%');
 }
 
 async function getVaquitaInterest() {
     const deposit = await vaquitaPool.positions(depositIdHex);
     const period = await vaquitaPool.periods(deposit.lockPeriod);
-    const interest = period.totalDeposits * deposit.amount / period.totalDeposits;
+    const interest = Number(period.totalDeposits) * Number(deposit.amount) / Number(period.totalDeposits);
+    const apy = (Number(interest) * 100) / Number(deposit.amount);
     console.log("vaquita interest", interest);
+    console.log("vaquita apy", apy, '%');
 }
 
 getAaveInterest();
