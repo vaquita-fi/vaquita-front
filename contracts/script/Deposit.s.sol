@@ -6,7 +6,7 @@ import {VaquitaPool} from "../src/VaquitaPool.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract DepositScript is Script {
-    function run(address vaquitaPoolAddress, address usdcAddress, bytes16 depositId) public {
+    function run(address vaquitaPoolAddress, address usdcAddress) public {
         // call deposit function from vaquita base sepolia contract
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
         vm.startBroadcast(deployerPrivateKey);
@@ -17,7 +17,6 @@ contract DepositScript is Script {
 
         // call deposit function from vaquita base sepolia contract
         VaquitaPool(vaquitaPoolAddress).deposit(
-            depositId,
             amount,
             1 weeks,
             vm.getBlockNumber() + 1000,
