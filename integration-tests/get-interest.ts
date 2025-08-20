@@ -19,22 +19,52 @@ const vaquitaPoolAbi = [
     stateMutability: "nonpayable"
   },
   {
+    "type": "function",
+    "name": "positions",
+    "inputs": [
+      { "name": "", "type": "bytes16", "internalType": "bytes16" }
+    ],
+    "outputs": [
+      { "name": "id", "type": "bytes16", "internalType": "bytes16" },
+      { "name": "owner", "type": "address", "internalType": "address" },
+      { "name": "amount", "type": "uint256", "internalType": "uint256" },
+      { "name": "liquidityIndex", "type": "uint256", "internalType": "uint256" },
+      { "name": "entryTime", "type": "uint256", "internalType": "uint256" },
+      { "name": "finalizationTime", "type": "uint256", "internalType": "uint256" },
+      { "name": "isActive", "type": "bool", "internalType": "bool" },
+      { "name": "lockPeriod", "type": "uint256", "internalType": "uint256" }
+    ],
+    "stateMutability": "view"
+  },
+  {
     type: "function",
-    name: "getPosition",
+    name: "periods",
     inputs: [
-      { name: "depositId", type: "bytes16", internalType: "bytes16" }
+      { name: "", type: "uint256", internalType: "uint256" }
     ],
     outputs: [
-      { name: "positionOwner", type: "address", internalType: "address" },
-      { name: "positionAmount", type: "uint256", internalType: "uint256" },
-      { name: "liquidityIndex", type: "uint256", internalType: "uint256" },
-      { name: "entryTime", type: "uint256", internalType: "uint256" },
-      { name: "finalizationTime", type: "uint256", internalType: "uint256" },
-      { name: "positionIsActive", type: "bool", internalType: "bool" },
-      { name: "period", type: "uint256", internalType: "uint256" }
+      { name: "rewardPool", type: "uint256", internalType: "uint256" },
+      { name: "totalDeposits", type: "uint256", internalType: "uint256" }
     ],
     stateMutability: "view"
   }
+//   {
+//     type: "function",
+//     name: "getPosition",
+//     inputs: [
+//       { name: "depositId", type: "bytes16", internalType: "bytes16" }
+//     ],
+//     outputs: [
+//       { name: "positionOwner", type: "address", internalType: "address" },
+//       { name: "positionAmount", type: "uint256", internalType: "uint256" },
+//       { name: "liquidityIndex", type: "uint256", internalType: "uint256" },
+//       { name: "entryTime", type: "uint256", internalType: "uint256" },
+//       { name: "finalizationTime", type: "uint256", internalType: "uint256" },
+//       { name: "positionIsActive", type: "bool", internalType: "bool" },
+//       { name: "period", type: "uint256", internalType: "uint256" }
+//     ],
+//     stateMutability: "view"
+//   }
 ];
 
 const aavePoolAbi = [
@@ -143,9 +173,7 @@ const aavePoolAbi = [
   }
 ];
 
-const privateKey = process.env.PRIVATE_KEY!;
 const rpcUrl = process.env.BASE_SEPOLIA_RPC_URL!;
-console.log("rpcUrl", rpcUrl);
 
 const vaquitaPoolAddress = process.env.BASE_SEPOLIA_VAQUITA_POOL_ADDRESS!;
 const aavePoolAddress = process.env.BASE_SEPOLIA_AAVE_POOL_ADDRESS!;
@@ -153,28 +181,31 @@ const usdcAddress = process.env.BASE_SEPOLIA_USDC_ADDRESS!;
 
 const provider = new ethers.JsonRpcProvider(rpcUrl);
 
-const signer = new ethers.Wallet(
-  privateKey,
-  provider
-);
+const signer = ethers.Wallet.createRandom().connect(provider);
 
 const depositIdHex = process.env.DEPOSIT_ID!;
 
 const vaquitaPool = new ethers.Contract(vaquitaPoolAddress, vaquitaPoolAbi, signer);
 const aavePool = new ethers.Contract(aavePoolAddress, aavePoolAbi, signer);
 
-async function getInterest() {
+async function getAaveInterest() {
     // 1. get deposit details
-    const deposit = await vaquitaPool.getPosition(depositIdHex);
-    console.log("deposit", { deposit });
+    const deposit = await vaquitaPool.positions(depositIdHex);
 
     // 2. get aave liquidity index
     const aaveReserveData = await aavePool.getReserveData(usdcAddress);
-    console.log("aaveReserveData", { aaveReserveData });
 
-    const positionValue = (deposit.positionAmount * aaveReserveData.liquidityIndex) / deposit.liquidityIndex;
-    const interest = positionValue - deposit.positionAmount;
-    console.log("interest", interest);
+    const positionValue = (deposit.amount * aaveReserveData.liquidityIndex) / deposit.liquidityIndex;
+    const interest = positionValue - deposit.amount;
+    console.log("aave interest", interest);
 }
 
-getInterest();
+async function getVaquitaInterest() {
+    const deposit = await vaquitaPool.positions(depositIdHex);
+    const period = await vaquitaPool.periods(deposit.lockPeriod);
+    const interest = period.totalDeposits * deposit.amount / period.totalDeposits;
+    console.log("vaquita interest", interest);
+}
+
+getAaveInterest();
+getVaquitaInterest();
