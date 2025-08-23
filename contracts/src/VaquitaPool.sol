@@ -258,9 +258,7 @@ contract VaquitaPool is Initializable, OwnableUpgradeable, PausableUpgradeable, 
      * @return currentValue The current value including accrued interest.
      */
     function _calculateCurrentPositionValue(uint256 principalAmount, uint256 entryLiquidityIndex) internal view returns (uint256 currentValue) {
-        (, uint256 currentLiquidityIndex, , , , , , , , , , ) = aavePool.getReserveData(address(token));
-        
-        // Calculate the current value: principal * (currentIndex / entryIndex)
-        currentValue = (principalAmount * currentLiquidityIndex) / entryLiquidityIndex;
+        uint256 currentIndex = aavePool.getReserveNormalizedIncome(address(token));
+        currentValue = (principalAmount * currentIndex) / entryLiquidityIndex;
     }
 } 

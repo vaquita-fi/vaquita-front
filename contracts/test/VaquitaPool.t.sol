@@ -222,8 +222,8 @@ contract VaquitaPoolTest is Test, TestUtils {
         uint256 aliceBalanceAfter = token.balanceOf(alice);
         console.log("Alice balance after withdraw:", aliceBalanceAfter);
 
-        (,uint256 liquidityIndex,,,,,,,,,,) = aavePool.getReserveData(address(token));
-        uint256 currentValue = (aliceDepositAmount * liquidityIndex) / aliceEntryLiquidityIndex;
+        uint256 currentIndex = aavePool.getReserveNormalizedIncome(address(token));
+        uint256 currentValue = (aliceDepositAmount * currentIndex) / aliceEntryLiquidityIndex;
         uint256 interest = currentValue - aliceDepositAmount;
         console.log("Current value:", currentValue);
         console.log("Interest:", interest);
@@ -272,11 +272,9 @@ contract VaquitaPoolTest is Test, TestUtils {
         console.log("bobReward", bobReward);
         
         // Alice withdraws (should get 1/3 of reward pool since she deposited 1M out of 3M total)
-        // (uint256 aliceCurrentValue, uint256 aliceInterest) = vaquita.getPositionValue(aliceDepositId);
         (,,uint256 aliceEntryLiquidityIndex,,) = vaquita.positions(aliceDepositId);
-        // uint256 aliceCurrentValue = vaquita._calculateCurrentPositionValue(aliceDepositAmount, aliceEntryLiquidityIndex);
-        (,uint256 currentLiquidityIndex,,,,,,,,,,) = aavePool.getReserveData(address(token));
-        uint256 aliceCurrentValue = (aliceDepositAmount * currentLiquidityIndex) / aliceEntryLiquidityIndex;
+        uint256 currentIndex = aavePool.getReserveNormalizedIncome(address(token));
+        uint256 aliceCurrentValue = (aliceDepositAmount * currentIndex) / aliceEntryLiquidityIndex;
         uint256 aliceInterest = aliceCurrentValue - aliceDepositAmount;
         console.log("Alice current value:", aliceCurrentValue);
         console.log("Alice interest:", aliceInterest);
@@ -285,11 +283,9 @@ contract VaquitaPoolTest is Test, TestUtils {
         console.log("Alice withdrawal:", aliceWithdrawal);
         uint256 aliceBalanceAfter = token.balanceOf(alice);
         
-        // Bob withdraws (should get 2/3 of remaining reward pool)
-        // (uint256 bobCurrentValue, uint256 bobInterest) = vaquita.getPositionValue(bobDepositId);
         (,,uint256 bobEntryLiquidityIndex,,) = vaquita.positions(bobDepositId);
-        (,uint256 currentLiquidityIndex2,,,,,,,,,,) = aavePool.getReserveData(address(token));
-        uint256 bobCurrentValue = (bobDepositAmount * currentLiquidityIndex2) / bobEntryLiquidityIndex;
+        uint256 currentIndex2 = aavePool.getReserveNormalizedIncome(address(token));
+        uint256 bobCurrentValue = (bobDepositAmount * currentIndex2) / bobEntryLiquidityIndex;
         uint256 bobInterest = bobCurrentValue - bobDepositAmount;
         console.log("Bob current value:", bobCurrentValue);
         console.log("Bob interest:", bobInterest);
