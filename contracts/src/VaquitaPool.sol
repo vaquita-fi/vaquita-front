@@ -116,10 +116,9 @@ contract VaquitaPool is Initializable, OwnableUpgradeable, PausableUpgradeable, 
      * @param period The lock period chosen for this deposit
      * @param deadline The deadline for the permit signature
      * @param signature The permit signature for token approval
-     * @return liquidityIndex The liquidity index of the position
      * @dev Emits FundsDeposited event
      */
-    function deposit(uint256 amount, uint256 period, uint256 deadline, bytes memory signature) external nonReentrant whenNotPaused returns (uint256 liquidityIndex) {
+    function deposit(uint256 amount, uint256 period, uint256 deadline, bytes memory signature) external nonReentrant whenNotPaused {
         if (amount == 0) revert InvalidAmount();
         if (!isSupportedLockPeriod[period]) revert PeriodNotSupported();
         bytes32 depositId = keccak256(abi.encodePacked(msg.sender, depositNonces[msg.sender]++));
@@ -140,8 +139,7 @@ contract VaquitaPool is Initializable, OwnableUpgradeable, PausableUpgradeable, 
 
         // Supply to Aave
         aavePool.supply(address(token), amount, address(this), 0);
-        (, liquidityIndex, , , , , , , , , , ) = aavePool.getReserveData(address(token));
-        position.liquidityIndex = liquidityIndex;
+        position.liquidityIndex = aavePool.getReserveNormalizedIncome(address(token));
         periods[period].totalDeposits += amount;
 
         emit FundsDeposited(depositId, msg.sender, amount, period);

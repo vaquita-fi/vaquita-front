@@ -158,7 +158,7 @@ contract VaquitaPoolTest is Test, TestUtils {
         vm.expectEmit(true, true, true, true);
         emit VaquitaPool.FundsDeposited(aliceDepositId, alice, initialAmount, lockPeriod);
         vaquita.deposit(initialAmount, lockPeriod, block.timestamp + 1 hours, "");
-        (,uint256 aavePoolLiquidityIndex,,,,,,,,,,) = aavePool.getReserveData(address(token));
+        uint256 aavePoolLiquidityIndex = aavePool.getReserveNormalizedIncome(address(token));
         (address positionOwner, uint256 positionAmount,uint256 positionLiquidityIndex,uint256 positionFinalizationTime,uint256 positionLockPeriod) = vaquita.positions(aliceDepositId);
         assertEq(positionOwner, alice, "Position owner should be alice");
         assertEq(positionAmount, initialAmount, "Position amount should be initialAmount");
