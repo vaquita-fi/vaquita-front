@@ -230,7 +230,7 @@ contract VaquitaPoolTest is Test, TestUtils {
 
         (uint256 rewardPool, uint256 totalDeposits) = vaquita.periods(lockPeriod);
         assertEq(totalDeposits, 0, "Total deposits should be 0");
-        assertEq(rewardPool, interest, "Reward pool should be 50e6");
+        assertEq(rewardPool, interest, "Reward pool should be interest");
         assertEq(aliceWithdrawal, initialAmount, "Alice should withdraw all her funds");
         assertEq(aliceBalanceBefore, aliceBalanceAfter, "Alice should not have lost any balance");
     }
