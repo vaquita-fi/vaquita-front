@@ -19,7 +19,7 @@ contract DeployVaquitaPoolBaseSepoliaScript is Script {
         // Encode initializer data
         address aavePool = 0x07eA79F68B2B3df564D0A34F8e19D9B1e339814b; // Base Sepolia Aave V3 Pool
         address token = 0x036CbD53842c5426634e7929541eC2318f3dCF7e; // Base Sepolia USDC
-        uint256 lockPeriod = 1 weeks;
+        uint256 lockPeriod = 1 minutes;
         uint256[] memory lockPeriods = new uint256[](1);
         lockPeriods[0] = lockPeriod;
         bytes memory initData = abi.encodeWithSelector(
